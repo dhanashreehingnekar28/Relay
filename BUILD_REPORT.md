@@ -40,7 +40,7 @@ Neha sharing uses a random link secret plus code; only hashes are stored. Redemp
 ## Remaining configuration checks
 The Vercel project remains persistently linked to kotebhakti30/Relay. Explicit deployments from the requested dhanashreehingnekar28/Relay repository work, but automatic deployment of future pushes requires changing the dashboard Git connection. The dashboard tab needs the owner to sign in; connector tools do not expose reconnection of an existing project. No duplicate project was created.
 
-The existing connection is verified as Neon with successful schema access. The exact Neon console project/branch ID was not independently matched because the sensitive URL remains hidden and no Neon management session is available. The existing production credential was preserved.
+The existing connection is verified as Neon with successful schema access. Read-only PostgreSQL settings confirmed project late-cloud-34503087 and branch br-square-paper-bcw4qo4e, exactly matching the supplied Neon console link. The existing production credential was preserved.
 
 Runtime logs showed a pg SSL-mode deprecation warning; the current driver treats require as verify-full. No application crash was observed. This warning is not an authentication or database failure.
 
