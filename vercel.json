@@ -1,0 +1,1 @@
+{"framework":"vite","rewrites":[{"source":"/api/:route*","destination":"/api/relay?route=:route*"}],"functions":{"api/relay.js":{"maxDuration":45}}}
