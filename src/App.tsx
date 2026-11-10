@@ -206,7 +206,7 @@ function Shell() {
         />
       )}
       <div className="main-shell">
-        <header className="topbar">
+        <header className="topbar"><span className="badge">{state.role === "incoming" ? "Viewing as Incoming Developer, Neha" : "Viewing as Team Lead, Riya"}</span>
           <button
             className="mobile-menu icon-button"
             aria-label="Open navigation"

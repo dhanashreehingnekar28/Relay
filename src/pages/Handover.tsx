@@ -6,7 +6,7 @@ import { latest, readerClaims, plan } from "../domain/engine";
 import { Heading, Badge, Empty, Evidence, date, Modal } from "../components/UI";
 import type { Claim } from "../domain/types";
 export function Handover() {
-  const { state, p, dispatch, incomingLink } = useStore();
+  const { state, p, dispatch, incomingLink, accessCode } = useStore();
   const v = latest(p);
   const [inspect, setInspect] = useState<Claim | null>(null);
   const [ack, setAck] = useState(false);
@@ -67,13 +67,14 @@ export function Handover() {
                   className="primary"
                   onClick={() => dispatch({ type: "role", role: "incoming" })}
                 >
-                  Get Neha’s access link
+                  Share with Neha
                 </button>
               )}
             </div>
           </section>
           {incomingLink && (
             <section className="panel">
+              <h2>Share with Neha</h2><p>Access code: <strong>{accessCode}</strong></p><button onClick={()=>dispatch({type:"role",role:"incoming"})}>Regenerate link and code</button><button onClick={()=>dispatch({type:"revoke"})}>Revoke access</button>
               <label>
                 Neha’s access link
                 <input
@@ -88,7 +89,7 @@ export function Handover() {
                 rel="noopener noreferrer"
                 href={incomingLink}
               >
-                Open Neha’s handover
+                Open Neha’s view in a new window
               </a>
             </section>
           )}
@@ -110,7 +111,7 @@ export function Handover() {
                 <h3>{c.statement}</h3>
                 <div className="flex gap-2 flex-wrap">
                   <Badge>{c.evidence}</Badge>
-                  {c.resolution && <Badge>Reviewer clarified</Badge>}
+                  {c.resolution && <Badge>Reviewer-confirmed</Badge>}
                 </div>
                 <p>
                   Owner: <strong>{c.owner}</strong>
@@ -162,7 +163,7 @@ export function Handover() {
   );
 }
 export function Plan() {
-  const { state, p, dispatch, incomingLink } = useStore();
+  const { state, p, dispatch, incomingLink, accessCode } = useStore();
   const v = latest(p);
   const tasks = plan(v);
   const completed = tasks.filter((t) => p.tasks[t.id]?.done).length;

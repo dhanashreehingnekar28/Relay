@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useState } from "react";
 import type { Claim, ReviewState, Gap } from "../domain/types";
 import { useStore } from "../state/Store";
@@ -47,6 +48,9 @@ export function ReviewDialog({
           <Badge>{claim.evidence}</Badge>
           <Badge>{claim.id}</Badge>
         </div>
+        <p>{claim.explanation}</p>
+        <label>Review action<select aria-label="Review action" onChange={e=>{if(e.target.value==="confirm"){setReview("Accepted");setResolution(note);}if(e.target.value==="unresolved")setReview("Unresolved");if(e.target.value==="reject")setReview("Rejected");}}><option value="edit">Edit owner/statement</option><option value="confirm">Confirm with reason</option><option value="unresolved">Mark unresolved</option><option value="reject">Reject</option></select></label>
+        <Link className="button" to="/sources" onClick={onClose}>Add supporting note</Link><p>Add the source note with its reason, then run Reconstruct to recompute the evidence label.</p>
         {gap && (
           <div className="note">
             <strong>{gap.title}</strong>

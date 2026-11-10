@@ -130,7 +130,7 @@ export function Evidence({
       </div>
       {claim.resolution && (
         <div className="note">
-          <strong>Reviewer resolution</strong>
+          <strong>Reviewer-confirmed</strong>
           <p>{claim.resolution}</p>
           <small>Original evidence label is retained for traceability.</small>
         </div>

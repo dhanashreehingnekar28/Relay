@@ -162,7 +162,7 @@ export function Store({ children }: { children: ReactNode }) {
     </aside>
   );
   const share = location.hash.match(/^#share=([\w-]+)$/)?.[1];
-  if (share) return <main className="entry"><h1>Neha’s handover</h1><p>Enter the access code supplied by your team lead.</p><form onSubmit={async e=>{e.preventDefault();setBusy(true);try { const r=await api("redeem","","POST",{secret:share,code});history.replaceState(null,"",location.pathname+"#/handover");remember(r.token); }catch(e){setError((e as Error).message);}finally{setBusy(false);}}}><label>Access code<input required value={code} onChange={e=>setCode(e.target.value)} /></label><button disabled={busy}>Open handover</button></form>{feedback}</main>;
+  if (share) return <main className="entry"><h1>Neha's handover</h1><p>Enter the access code supplied by your team lead.</p><form onSubmit={async e=>{e.preventDefault();setBusy(true);try { const r=await api("redeem","","POST",{secret:share,code});history.replaceState(null,"",location.pathname+"#/handover");remember(r.token); }catch(e){setError((e as Error).message);}finally{setBusy(false);}}}><label>Access code<input required value={code} onChange={e=>setCode(e.target.value)} /></label><button disabled={busy}>Open handover</button></form>{feedback}</main>;
   if (!state)
     return (
       <main className="entry">
