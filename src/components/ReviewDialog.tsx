@@ -13,7 +13,7 @@ export function ReviewDialog({
   onClose: () => void;
 }) {
   const { dispatch } = useStore();
-  const [action,setAction] = useState("edit");
+  const [action, setAction] = useState("edit");
   const [statement, setStatement] = useState(claim.statement);
   const [owner, setOwner] = useState(claim.owner);
   const [review, setReview] = useState<ReviewState>(
@@ -50,8 +50,33 @@ export function ReviewDialog({
           <Badge>{claim.id}</Badge>
         </div>
         <p>{claim.explanation}</p>
-        <label>Review action<select aria-label="Review action" onChange={e=>{setAction(e.target.value);if(e.target.value==="confirm"){setReview("Accepted");setResolution(note);}if(e.target.value==="unresolved")setReview("Unresolved");if(e.target.value==="reject")setReview("Rejected");}}><option value="edit">Edit owner/statement</option><option value="confirm">Confirm with reason</option><option value="unresolved">Mark unresolved</option><option value="reject">Reject</option></select></label>
-        <Link className="button" to="/sources" onClick={onClose}>Add supporting note</Link><p>Add the source note with its reason, then run Reconstruct to recompute the evidence label.</p>
+        <label>
+          Review action
+          <select
+            aria-label="Review action"
+            onChange={(e) => {
+              setAction(e.target.value);
+              if (e.target.value === "confirm") {
+                setReview("Accepted");
+                setResolution(note);
+              }
+              if (e.target.value === "unresolved") setReview("Unresolved");
+              if (e.target.value === "reject") setReview("Rejected");
+            }}
+          >
+            <option value="edit">Edit owner/statement</option>
+            <option value="confirm">Confirm with reason</option>
+            <option value="unresolved">Mark unresolved</option>
+            <option value="reject">Reject</option>
+          </select>
+        </label>
+        <Link className="button" to="/sources" onClick={onClose}>
+          Add supporting note
+        </Link>
+        <p>
+          Add the source note with its reason, then run Reconstruct to recompute
+          the evidence label.
+        </p>
         {gap && (
           <div className="note">
             <strong>{gap.title}</strong>

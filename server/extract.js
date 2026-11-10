@@ -9,7 +9,10 @@ export function verified(record, excerpt) {
   );
 }
 function ownerOf(text) {
-  text = text.replace(/\b([A-Z][a-z]+) confirmed (?:that )?(?:she|he|they) (?:will )?(?:own|owns)/g, "$1 owns");
+  text = text.replace(
+    /\b([A-Z][a-z]+) confirmed (?:that )?(?:she|he|they) (?:will )?(?:own|owns)/g,
+    "$1 owns",
+  );
   return (
     text.match(
       /\b([\p{Lu}][\p{L}'-]+)\s+(?:will\s+own|owns|will\s+take\s+over|is responsible for)\b/u,
@@ -39,13 +42,23 @@ function subject(s) {
 }
 export function uncertainty(sources, conflict) {
   if (conflict) return "Conflicting";
-  const independent = new Set(sources.map(r => r.id || r));
-  return independent.size < 2 || sources.some(r => Date.now() - new Date(r.recorded_at).getTime() > 42 * 86400000)
-    ? "Insufficient Evidence" : "Supported";
+  const independent = new Set(sources.map((r) => r.id || r));
+  return independent.size < 2 ||
+    sources.some(
+      (r) => Date.now() - new Date(r.recorded_at).getTime() > 42 * 86400000,
+    )
+    ? "Insufficient Evidence"
+    : "Supported";
 }
 function topic(text) {
   if (/nightly digest|cron job/i.test(text)) return "nightly digest cron";
-  return norm(text.toLowerCase().replace(/^.*?(?:owns|will own|responsible for|take over)\s+/i, "").replace(/\bafter\b.*$/, "").replace(/[^a-z0-9 ]/g, ""));
+  return norm(
+    text
+      .toLowerCase()
+      .replace(/^.*?(?:owns|will own|responsible for|take over)\s+/i, "")
+      .replace(/\bafter\b.*$/, "")
+      .replace(/[^a-z0-9 ]/g, ""),
+  );
 }
 function rules(records) {
   return records.flatMap((r) =>
@@ -157,9 +170,11 @@ export async function extract(records) {
       }
       const quote = norm(c.excerpt);
       const key =
-        c.type === "Ownership" ? "ownership:" + topic(quote) : c.type === "Blockers" && states(quote)
-          ? subject(quote)
-          : r.id + " " + quote;
+        c.type === "Ownership"
+          ? "ownership:" + topic(quote)
+          : c.type === "Blockers" && states(quote)
+            ? subject(quote)
+            : c.type + ":" + subject(quote);
       const group = groups.get(key) || { type: c.type, links: [] };
       if (!group.links.some((x) => x.r.id === r.id))
         group.links.push({ r, quote });
@@ -168,7 +183,13 @@ export async function extract(records) {
     for (const [key, { type, links }] of groups) {
       const refs = links.map((l) => l.r.id);
       const statement = links.at(-1).quote;
-      const conflict = (type === "Ownership" && new Set(links.map(l => ownerOf(l.quote)).filter(x => x !== "Unassigned")).size > 1) ||
+      const conflict =
+        (type === "Ownership" &&
+          new Set(
+            links
+              .map((l) => ownerOf(l.quote))
+              .filter((x) => x !== "Unassigned"),
+          ).size > 1) ||
         new Set(links.map((l) => states(l.quote)).filter(Boolean)).size > 1;
       const id =
         refs.includes("GH-34") && refs.includes("CH-1")
@@ -197,12 +218,38 @@ export async function extract(records) {
         resolution: "",
         note: "",
         updated: new Date().toISOString(),
-        sourceAges: Object.fromEntries(links.map(l => [l.r.id, Math.max(0, Math.floor((Date.now()-new Date(l.r.recorded_at).getTime())/86400000))])),
+        sourceAges: Object.fromEntries(
+          links.map((l) => [
+            l.r.id,
+            Math.max(
+              0,
+              Math.floor(
+                (Date.now() - new Date(l.r.recorded_at).getTime()) / 86400000,
+              ),
+            ),
+          ]),
+        ),
         explanation: conflict
           ? "The records describe incompatible states or owners for the same subject."
           : evidence === "Supported"
             ? "The cited text supports this candidate. A reviewer must decide whether to publish it."
-            : "Insufficient evidence: fewer than two independent sources, or a source is older than six weeks (42 days).",
+            : [
+                refs.length < 2
+                  ? "Only one independent source is available."
+                  : "",
+                ...links
+                  .filter(
+                    (l) =>
+                      Date.now() - new Date(l.r.recorded_at).getTime() >
+                      42 * 86400000,
+                  )
+                  .map(
+                    (l) =>
+                      `${l.r.id} is ${Math.floor((Date.now() - new Date(l.r.recorded_at).getTime()) / 86400000)} days old, beyond the six-week (42-day) limit.`,
+                  ),
+              ]
+                .filter(Boolean)
+                .join(" "),
       });
     }
   }

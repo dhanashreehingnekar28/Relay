@@ -192,13 +192,23 @@ export async function request(method, path, header, b, ip) {
       const w = await seed(db);
       return { token: issue(w, "reviewer") };
     });
-  if (route === "POST redeem") return transaction(async db => {
-    await limit(db, "redeem:" + ipKey, 10);
-    const hash = value => createHash("sha256").update(String(value || "")).digest("hex");
-    const row = (await db.query("SELECT id,invite_epoch FROM workspaces WHERE active AND invite_hash=$1 AND invite_code_hash=$2", [hash(b.secret),hash(b.code)])).rows[0];
-    if (!row) fail(403, "Invalid or revoked access link or code.");
-    return {token:issue(row.id,"incoming",row.invite_epoch)};
-  });
+  if (route === "POST redeem") {
+    await transaction((db) => limit(db, "redeem:" + ipKey, 10));
+    return transaction(async (db) => {
+      const hash = (value) =>
+        createHash("sha256")
+          .update(String(value || ""))
+          .digest("hex");
+      const row = (
+        await db.query(
+          "SELECT id,invite_epoch FROM workspaces WHERE active AND invite_hash=$1 AND invite_code_hash=$2",
+          [hash(b.secret), hash(b.code)],
+        )
+      ).rows[0];
+      if (!row) fail(403, "Invalid or revoked access link or code.");
+      return { token: issue(row.id, "incoming", row.invite_epoch) };
+    });
+  }
   const { role, workspace: w, epoch } = verify(header);
   return transaction(async (db) => {
     const ws = (
@@ -208,7 +218,8 @@ export async function request(method, path, header, b, ip) {
       )
     ).rows[0];
     if (!ws) fail(404, "Workspace unavailable.");
-    if (role === "incoming" && (!ws.invite_hash || epoch !== ws.invite_epoch)) fail(403,"Access revoked. Ask the lead for a new link.");
+    if (role === "incoming" && (!ws.invite_hash || epoch !== ws.invite_epoch))
+      fail(403, "Access revoked. Ask the lead for a new link.");
     if (b.workspace && b.workspace !== w) fail(403, "Workspace mismatch.");
     if (method === "GET") {
       if (path === "audit" && role !== "reviewer")
@@ -275,16 +286,29 @@ export async function request(method, path, header, b, ip) {
     if (route === "POST invite") {
       if (!(await versions(db, w, role)).length)
         fail(409, "Approve a handover first.");
-      const secret=randomBytes(32).toString("base64url"), code=String(randomInt(100000,1000000));
-      const hash = value => createHash("sha256").update(value).digest("hex");
-      await db.query("UPDATE workspaces SET invite_hash=$2,invite_code_hash=$3,invite_epoch=invite_epoch+1 WHERE id=$1",[w,hash(secret),hash(code)]);
-      await log(db,w,role,"Sharing","Generated a new incoming access link; previous access revoked.");
-      return {secret,code};
+      const secret = randomBytes(32).toString("base64url"),
+        code = String(randomInt(100000, 1000000));
+      const hash = (value) => createHash("sha256").update(value).digest("hex");
+      await db.query(
+        "UPDATE workspaces SET invite_hash=$2,invite_code_hash=$3,invite_epoch=invite_epoch+1 WHERE id=$1",
+        [w, hash(secret), hash(code)],
+      );
+      await log(
+        db,
+        w,
+        role,
+        "Sharing",
+        "Generated a new incoming access link; previous access revoked.",
+      );
+      return { secret, code };
     }
     if (route === "POST revoke") {
-      await db.query("UPDATE workspaces SET invite_hash=null,invite_code_hash=null,invite_epoch=invite_epoch+1 WHERE id=$1",[w]);
-      await log(db,w,role,"Sharing","Revoked incoming access.");
-      return {ok:true};
+      await db.query(
+        "UPDATE workspaces SET invite_hash=null,invite_code_hash=null,invite_epoch=invite_epoch+1 WHERE id=$1",
+        [w],
+      );
+      await log(db, w, role, "Sharing", "Revoked incoming access.");
+      return { ok: true };
     }
     if (route === "POST sources") {
       const text = field(b.text, 8000),
@@ -303,7 +327,7 @@ export async function request(method, path, header, b, ip) {
         [w, id, title, text, b.visibility],
       );
       await db.query("UPDATE workspaces SET dirty=true WHERE id=$1", [w]);
-      await log(db, w, role, "Imported", title + " - " + field(b.reason || "Imported project source", 2000));
+      await log(db, w, role, "Imported", title + " - " + field(b.reason, 2000));
     } else if (route === "POST reconstruct") {
       await limit(db, "workspace:" + w, 5);
       await limit(db, "extract:" + ipKey, 15);
@@ -321,12 +345,24 @@ export async function request(method, path, header, b, ip) {
       ).rows.map((r) => r.data);
       await db.query("DELETE FROM claims WHERE workspace=$1", [w]);
       for (let c of claims) {
-        const existing = prior.find(old => old.id === c.id);
+        const existing = prior.find((old) => old.id === c.id);
         if (existing) {
-          c = {...c, statement: existing.resolution ? existing.statement : c.statement,
+          c = {
+            ...c,
+            statement: existing.resolution ? existing.statement : c.statement,
             owner: existing.resolution ? existing.owner : c.owner,
-            review: existing.review, note: existing.note, resolution: existing.resolution,
-            evidenceHistory: [...(existing.evidenceHistory || []), {at:new Date().toISOString(), label:existing.evidence, refs:existing.refs}]};
+            review: existing.review,
+            note: existing.note,
+            resolution: existing.resolution,
+            evidenceHistory: [
+              ...(existing.evidenceHistory || []),
+              {
+                at: new Date().toISOString(),
+                label: existing.evidence,
+                refs: existing.refs,
+              },
+            ],
+          };
         }
         await db.query("INSERT INTO claims VALUES($1,$2,$3)", [w, c.id, c]);
         for (const id of c.refs)

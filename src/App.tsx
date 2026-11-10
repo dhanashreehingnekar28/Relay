@@ -206,7 +206,12 @@ function Shell() {
         />
       )}
       <div className="main-shell">
-        <header className="topbar"><span className="badge">{state.role === "incoming" ? "Viewing as Incoming Developer, Neha" : "Viewing as Team Lead, Riya"}</span>
+        <header className="topbar">
+          <span className="badge">
+            {state.role === "incoming"
+              ? "Viewing as Incoming Developer, Neha"
+              : "Viewing as Team Lead, Riya"}
+          </span>
           <button
             className="mobile-menu icon-button"
             aria-label="Open navigation"
@@ -259,7 +264,8 @@ function Shell() {
               <li>Run Reconstruction and inspect an exact quotation.</li>
               <li>Review the candidates, choose Neha and approve.</li>
               <li>
-                Open Neha’s link in another browser, complete a task and
+                After approval, click Share with Neha. Copy the link and access
+                code into a private window. Enter the code, complete a task and
                 acknowledge receipt.
               </li>
             </ol>
