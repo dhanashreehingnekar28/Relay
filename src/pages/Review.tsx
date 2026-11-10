@@ -61,6 +61,7 @@ export function Review() {
                   <h3>{c.statement}</h3>
                   <div className="flex flex-wrap gap-2">
                     <Badge>{c.evidence}</Badge>
+                    {c.resolution && <Badge>Reviewer-confirmed</Badge>}
                     {c.restricted && <Badge>Excluded from incoming view</Badge>}
                     <span className="meta">Owner: {c.owner}</span>
                   </div>

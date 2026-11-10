@@ -45,3 +45,15 @@ The judge entered “Kabir will own the nightly digest cron job after Aarav leav
 Seven extraction/permission unit tests and the PostgreSQL immutability test passed. Three updated local browser/API scenarios passed, including incoming code redemption, revocation and regeneration, rejected/restricted/unapproved direct-ID denial, unresolved handover inclusion, and evidence count increasing from one to two without counting human confirmation. See RELEASE_CHECKLIST.md for the migration and release handoff. Live status for the new implementation must be updated only after deployment and re-running those checks.
 
 The app uses synthetic demo identities and signed demo access, not OAuth. Extraction uses bounded English rules unless an optional provider is configured. Deterministic topic matching is intentionally narrow and can require human correction. No extraction-accuracy claim or enterprise security certification is made. Historical evidence states are retained in claim data; prior versions and review events remain immutable.
+
+## Final live check after pushing implementation
+
+The updated suite against the canonical Production URL failed all three scenarios because the previous release is still served:
+
+- Desktop and mobile: `Error: locator.fill: Test timeout of 15000ms exceeded.` Call log: `waiting for getByLabel('Reason for adding this source')`. This new required field is absent.
+- Evidence refresh: `Expected: "Insufficient Evidence"; Received: "Supported"` for a single fresh source. Repeating this test with a 60-second timeout produced the same assertion failure.
+- New redemption endpoint probe: HTTP 401, `{"error":"A valid workspace link is required."}`. The updated endpoint returns 403 for invalid codes instead.
+
+For the updated eight-step run: step 1 passed; step 2 failed at the missing reason field; steps 3–8 were blocked by that failure and were not re-verified for the updated release. The baseline results above remain separate. No updated live success is claimed. GitHub main received the implementation; the GitHub combined status had no deployment statuses. Vercel production association and automatic deploy could not be confirmed.
+
+Security checks: .env and .env.production are ignored; only blank .env.example placeholders are tracked. A pattern scan across 13 history revisions found no credentialed PostgreSQL URLs, known provider-token patterns or private-key headers. This is a scoped scan, not proof against every possible secret format. npm audit reported zero vulnerabilities.

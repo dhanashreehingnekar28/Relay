@@ -46,3 +46,14 @@ On Windows the tests use installed Microsoft Edge. On other platforms first run 
 8. Return to the lead and refresh Activity History. Verify review, approval and acknowledgement. Make a later draft edit and confirm version 1 remains unchanged.
 
 Record pass/fail and the exact displayed error for each step. Do not describe the updated release as live until this run passes. If approval is disabled, review all candidates and either record a genuine reviewer confirmation or mark uncertain claims Unresolved; an Accepted label alone does not resolve an evidence concern.
+
+## Source delivery and Git fallback
+Implementation commits have already been pushed to main. Normally use the git pull command above; do not duplicate those commits. A complete tracked-source ZIP and a patch are also supplied beside the local repository. If you must apply the source to a different clean checkout instead, review changes and run:
+
+```powershell
+git add server src schema.sql scripts tests playwright.config.ts index.html README.md BUILD_REPORT.md FORM_ANSWERS.md RELEASE_CHECKLIST.md
+git commit -m "Implement reviewed evidence and revocable Neha handover access"
+git push origin main
+```
+
+Use these fallback commands only when the changes are not already on that checkout. Then perform the migration and Vercel steps above.
