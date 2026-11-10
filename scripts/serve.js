@@ -1,6 +1,6 @@
 import http from "node:http";
 import { readFile } from "node:fs/promises";
-import { resolve, extname } from "node:path";
+import { resolve, extname, sep } from "node:path";
 import handler from "../api/relay.js";
 const root = resolve("dist");
 export function serve(port = 5173) {
@@ -30,7 +30,7 @@ export function serve(port = 5173) {
         return;
       }
       const file = resolve(root, "." + (path === "/" ? "/index.html" : path));
-      if (!file.startsWith(root + "/")) throw Error();
+      if (!file.startsWith(root + sep)) throw Error();
       const bytes = await readFile(file);
       res.setHeader(
         "Content-Type",
@@ -49,4 +49,4 @@ export function serve(port = 5173) {
   });
   return app.listen(port, "127.0.0.1");
 }
-if (process.argv[1]?.endsWith("/serve.js")) serve();
+if (process.argv[1]?.replaceAll("\\", "/").endsWith("/serve.js")) serve();

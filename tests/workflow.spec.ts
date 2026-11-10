@@ -7,7 +7,11 @@ test("CampusConnect • eight-step signed-out handover and direct API permission
 }) => {
   const capture = async (p: typeof page, name: string) => {
     if (!process.env.RELAY_TEST_URL) {
-      await p.locator(name === "evidence" ? ".inspector .explanation" : ".handover-banner").evaluate(el=>el.scrollIntoView({block:"start"}));
+      await p
+        .locator(
+          name === "evidence" ? ".inspector .explanation" : ".handover-banner",
+        )
+        .evaluate((el) => el.scrollIntoView({ block: "start" }));
       await p.screenshot({ path: "test-results/screens/" + name + ".png" });
     }
   };
@@ -26,6 +30,9 @@ test("CampusConnect • eight-step signed-out handover and direct API permission
   ).toBeVisible();
   await go("sources");
   await page.getByLabel("Meeting note", { exact: true }).fill(note);
+  await page
+    .getByLabel("Reason for adding this source")
+    .fill("Confirm project ownership from a new source.");
   await b("Import note").click();
   await expect(
     page.getByRole("heading", { name: "Imported meeting note" }),
@@ -38,7 +45,7 @@ test("CampusConnect • eight-step signed-out handover and direct API permission
     .filter({ hasText: note })
     .first()
     .click();
-  await expect(page.locator(".inspector .excerpt")).toContainText(note);
+  await expect(page.locator(".inspector")).toContainText(note);
   await go("evidence/payment");
   await expect(page.locator(".inspector")).toContainText("Conflicting");
   await expect(page.locator(".inspector")).toContainText("Issue #34");
@@ -91,11 +98,20 @@ test("CampusConnect • eight-step signed-out handover and direct API permission
   await expect(page).toHaveURL(/handover/);
   const original = await (await get("handover")).json();
   expect(original.id).toBe(1);
-  await b("Get Neha’s access link").click();
+  await b("Share with Neha").click();
+  const code = await page
+    .locator("p")
+    .filter({ hasText: "Access code:" })
+    .locator("strong")
+    .innerText();
   const link = await page.getByLabel("Neha’s access link").inputValue();
   const other = await browser.newContext({ baseURL });
   const neha = await other.newPage();
   await neha.goto(link);
+  await neha.getByLabel("Access code").fill(code);
+  await neha
+    .getByRole("button", { name: "Open handover", exact: true })
+    .click();
   await expect(neha.locator(".handover-banner")).toContainText("Aarav → Neha");
   await expect(neha.locator("main")).toContainText(correction);
   await expect(neha.locator("main")).toContainText(note);
@@ -167,7 +183,10 @@ test("CampusConnect • eight-step signed-out handover and direct API permission
   expect(
     (
       await get(
-        "sources/" + claims.find((c: any) => c.owner === "Kabir").refs[0],
+        "sources/" +
+          claims
+            .find((c: any) => c.owner === "Kabir")
+            .refs.find((id: string) => id.length === 36),
         second,
       )
     ).status(),
@@ -176,6 +195,7 @@ test("CampusConnect • eight-step signed-out handover and direct API permission
     headers: auth,
     data: {
       title: "Later draft",
+      reason: "New draft context",
       text: "Isha owns the new build checklist.",
       visibility: "all",
     },
@@ -200,6 +220,27 @@ test("CampusConnect • eight-step signed-out handover and direct API permission
       })
     ).status(),
   ).toBe(400);
+  await expect(neha.locator("body")).not.toContainText("Vendor contingency");
+  expect(original.claims.find((c: any) => c.id === "cron").review).toBe(
+    "Unresolved",
+  );
+  const regenerated = await api.post("/api/invite", {
+    headers: auth,
+    data: {},
+  });
+  expect(regenerated.status()).toBe(200);
+  expect((await get("state", incoming)).status()).toBe(403);
+  const freshInvite = await regenerated.json();
+  const redeemed = await api.post("/api/redeem", { data: freshInvite });
+  expect(redeemed.status()).toBe(200);
+  const newIncoming = {
+    Authorization: "Bearer " + (await redeemed.json()).token,
+  };
+  await api.post("/api/revoke", { headers: auth, data: {} });
+  expect((await get("state", newIncoming)).status()).toBe(403);
+  expect((await api.post("/api/redeem", { data: freshInvite })).status()).toBe(
+    403,
+  );
   await other.close();
 });
 
@@ -215,13 +256,14 @@ test("Mobile note upload and direct access before approval", async ({
   await page.getByRole("button", { name: "Open navigation" }).click();
   await page.getByRole("link", { name: "Data Sources", exact: true }).click();
   const text = "Meera will own the transfer checklist.";
+  await page.getByLabel("Upload text or Markdown").setInputFiles({
+    name: "handover.md",
+    mimeType: "text/markdown",
+    buffer: Buffer.from(text),
+  });
   await page
-    .getByLabel("Upload text or Markdown")
-    .setInputFiles({
-      name: "handover.md",
-      mimeType: "text/markdown",
-      buffer: Buffer.from(text),
-    });
+    .getByLabel("Reason for adding this source")
+    .fill("Imported supporting source.");
   await page.getByRole("button", { name: "Import note" }).click();
   await expect(
     page.getByRole("heading", { name: "handover.md" }),
@@ -242,4 +284,47 @@ test("Mobile note upload and direct access before approval", async ({
   await expect(
     page.locator(".knowledge-card").filter({ hasText: text }),
   ).toBeVisible();
+});
+
+test("Evidence refresh preserves human confirmation without counting it as evidence", async ({
+  request,
+}) => {
+  const start = await request.post("/api/workspaces", { data: {} });
+  const headers = { Authorization: "Bearer " + (await start.json()).token };
+  const add = async (text: string) =>
+    request.post("/api/sources", {
+      headers,
+      data: {
+        text,
+        title: "Ownership confirmation",
+        reason: "Confirm transfer",
+        visibility: "all",
+      },
+    });
+  const claims = async () =>
+    (await request.get("/api/claims", { headers })).json();
+  await add("Lena owns the transfer checklist.");
+  await request.post("/api/reconstruct", { headers, data: {} });
+  const first = (await claims()).find((c: any) => c.owner === "Lena");
+  expect(first.refs).toHaveLength(1);
+  expect(first.evidence).toBe("Insufficient Evidence");
+  await request.patch("/api/claims/" + first.id, {
+    headers,
+    data: {
+      ...first,
+      review: "Accepted",
+      note: "Human checked ownership",
+      resolution: "Reviewer confirmed",
+    },
+  });
+  const confirmed = (await claims()).find((c: any) => c.id === first.id);
+  expect(confirmed.evidence).toBe("Insufficient Evidence");
+  expect(confirmed.refs).toHaveLength(1);
+  await add("Lena confirmed she will own the transfer checklist.");
+  await request.post("/api/reconstruct", { headers, data: {} });
+  const revised = (await claims()).find((c: any) => c.id === first.id);
+  expect(revised.refs).toHaveLength(2);
+  expect(revised.evidence).toBe("Supported");
+  expect(revised.resolution).toBe("Reviewer confirmed");
+  expect(revised.evidenceHistory.length).toBeGreaterThan(0);
 });

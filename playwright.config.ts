@@ -8,6 +8,7 @@ export default defineConfig({
   use: {
     baseURL: address,
     headless: true,
+    channel: process.platform === "win32" ? "msedge" : undefined,
     launchOptions:
       process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH ||
       existsSync("/usr/bin/chromium")
