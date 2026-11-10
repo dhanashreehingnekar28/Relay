@@ -109,7 +109,7 @@ export function Evidence({
     <>
       <div className="flex flex-wrap gap-2">
         <Badge>{claim.category}</Badge>
-        <Badge>{claim.evidence}</Badge>
+        <Badge>{claim.evidence}</Badge><Badge>Extractor · {claim.extractor}</Badge>
         <Badge>{claim.review}</Badge>
         {claim.restricted && <Badge>Lead only</Badge>}
       </div>
@@ -151,7 +151,7 @@ export function Evidence({
                 <strong>{r.title}</strong>
                 <ArrowUpRight size={16} />
               </div>
-              <p>“{r.content}”</p>
+              <p>“{claim.quotes?.[id] || r.content}”</p>
               <small>
                 {r.id} · {r.author} · {date(r.timestamp)}
               </small>

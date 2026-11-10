@@ -25,9 +25,9 @@ export function ReviewDialog({
       onClose={onClose}
     >
       <form
-        onSubmit={(e) => {
+        onSubmit={async (e) => {
           e.preventDefault();
-          dispatch({
+          if(!await dispatch({
             type: "review",
             id: claim.id,
             statement,
@@ -36,7 +36,7 @@ export function ReviewDialog({
             note,
             resolution,
             gapId: gap?.id,
-          });
+          }))return;
           onClose();
         }}
       >
@@ -74,7 +74,7 @@ export function ReviewDialog({
               value={owner}
               onChange={(e) => setOwner(e.target.value)}
             >
-              {["Aarav", "Riya", "Neha", "Kabir", "Unassigned"].map((n) => (
+              {Array.from(new Set([claim.owner,"Aarav", "Riya", "Neha", "Kabir", "Unassigned"])).map((n) => (
                 <option key={n}>{n}</option>
               ))}
             </select>
@@ -86,7 +86,7 @@ export function ReviewDialog({
               value={review}
               onChange={(e) => setReview(e.target.value as ReviewState)}
             >
-              {["Accepted", "Rejected", "Unresolved", "Pending Review"].map(
+              {["Accepted", "Rejected", "Unresolved"].map(
                 (n) => (
                   <option key={n}>{n}</option>
                 ),

@@ -31,6 +31,8 @@ export interface Claim {
   evidence: EvidenceState;
   review: ReviewState;
   refs: string[];
+  quotes?: Record<string,string>;
+  extractor?: string;
   explanation: string;
   restricted: boolean;
   note: string;
@@ -81,6 +83,7 @@ export interface TaskProgress {
   note: string;
 }
 export interface ProjectState {
+  records?: SourceRecord[];
   connections: SourceType[];
   restrictedEnabled: boolean;
   claims: Claim[];

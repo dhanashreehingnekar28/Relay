@@ -1,14 +1,17 @@
 {
-  "name": "relay-concept",
+  "name": "relay-handover",
   "private": true,
-  "version": "1.0.0",
+  "version": "2.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --host 127.0.0.1",
+    "dev": "npm run build && npm start",
     "build": "tsc -b && vite build",
-    "test": "vitest run",
-    "test:e2e": "playwright test",
-    "preview": "vite preview --host 127.0.0.1"
+    "test": "node --test server/*.test.js",
+    "test:e2e": "npm run build && playwright test",
+    "preview": "vite preview --host 127.0.0.1",
+    "start": "node --env-file-if-exists=.env scripts/serve.js",
+    "migrate": "node --env-file-if-exists=.env scripts/database.js migrate",
+    "seed": "node --env-file-if-exists=.env scripts/database.js seed"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.0",

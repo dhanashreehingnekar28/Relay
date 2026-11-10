@@ -26,7 +26,7 @@ export function History() {
       <Heading
         eyebrow="ACTIVITY & VERSION HISTORY"
         title="A record of how we got here."
-        description="Simulated, locally stored history. Previous approvals stay intact when the draft changes."
+        description="Workspace activity stored in PostgreSQL. Previous approvals stay intact when the draft changes."
       />
       <section className="panel">
         <h2>Approved handover versions</h2>
@@ -145,7 +145,7 @@ export function History() {
                   <details>
                     <summary>Inspect claim change</summary>
                     {p.reviews
-                      .filter((r) => r.claimId === e.claimId && r.at === e.at)
+                      .filter((r) => r.claimId === e.claimId && e.detail === r.after.review + ": " + r.after.statement)
                       .map((r) => (
                         <div className="diff" key={r.id}>
                           <p>

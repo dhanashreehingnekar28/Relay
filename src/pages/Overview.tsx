@@ -335,10 +335,10 @@ export function Projects() {
       <Heading
         eyebrow="WORKSPACE"
         title="Projects & people"
-        description="Choose a project context. The practice workspace keeps its own sources, reviews and versions."
+        description="Your isolated CampusConnect workspace and its handover team."
       />
       <div className="two-col">
-        {projects.map((pr) => (
+        {projects.slice(0,1).map((pr) => (
           <section className="panel" key={pr.id}>
             <span className="project-mark">{pr.code}</span>
             <h2>{pr.name}</h2>
@@ -369,29 +369,8 @@ export function Projects() {
             </div>
           ))}
         </div>
-        {state.role === "reviewer" && (
-          <label>
-            Departing team member
-            <select
-              value={p.departing}
-              onChange={(e) =>
-                dispatch({
-                  type: "members",
-                  departing: e.target.value,
-                  incoming: p.incoming,
-                })
-              }
-            >
-              <option>Aarav</option>
-              <option>Kabir</option>
-            </select>
-            <small>
-              Changing the departing member requires a fresh reconstruction.
-            </small>
-          </label>
-        )}
         <p className="hint">
-          All names and source records are fictional demonstration data.
+          The sample team and seeded records are fictional.
         </p>
       </section>
     </>

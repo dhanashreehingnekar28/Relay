@@ -135,7 +135,7 @@ export function Review() {
               Approve Handover
             </button>
             <small>
-              Creates an immutable local snapshot. Later edits require a new
+              Creates an versioned database snapshot. Later edits require a new
               approval.
             </small>
           </aside>
@@ -163,8 +163,8 @@ export function Review() {
             <button onClick={() => setConfirm(false)}>Cancel</button>
             <button
               className="primary"
-              onClick={() => {
-                dispatch({ type: "approve", audience, appropriate });
+              onClick={async () => {
+                if(!await dispatch({ type: "approve", audience, appropriate }))return;
                 setConfirm(false);
                 nav("/handover");
               }}

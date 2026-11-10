@@ -247,9 +247,9 @@ export function RecordPage() {
       {r ? (
         <>
           <Heading
-            eyebrow="EXACT SYNTHETIC SOURCE RECORD"
+            eyebrow="SOURCE RECORD"
             title={r.title}
-            description="This is a fictional record. The highlighted excerpt is the full relevant source text."
+            description="Read the original record used during extraction."
           />
           <section className="panel">
             <div className="flex gap-2">
@@ -263,7 +263,7 @@ export function RecordPage() {
               <dd>{r.author}</dd>
               <dt>Recorded</dt>
               <dd>{date(r.timestamp)}</dd>
-              <dt>Simulated reference</dt>
+              <dt>Record reference</dt>
               <dd>{r.reference}</dd>
               <dt>Related entities</dt>
               <dd>{r.entities.join(", ")}</dd>

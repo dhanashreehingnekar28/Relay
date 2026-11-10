@@ -1977,3 +1977,4 @@ footer {
     scroll-behavior: auto !important;
   }
 }
+.entry{max-width:850px;margin:8vh auto;padding:24px}.entry h1{font-size:clamp(32px,5vw,54px)}.entry button{margin-top:16px}.workspace-banner{margin:0 20px}.import-panel{max-width:780px;margin-bottom:24px}.import-panel label,.panel label{display:grid;gap:5px;margin:12px 0}.saving{position:fixed;right:16px;bottom:16px;background:#153e34;color:white;padding:10px 18px;z-index:500;border-radius:8px}.storage-warning{position:sticky;top:0;z-index:550}.panel ol{padding-left:1.6em;list-style:decimal}

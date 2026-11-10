@@ -6,7 +6,7 @@ import { latest, readerClaims, plan } from "../domain/engine";
 import { Heading, Badge, Empty, Evidence, date, Modal } from "../components/UI";
 import type { Claim } from "../domain/types";
 export function Handover() {
-  const { state, p, dispatch } = useStore();
+  const { state, p, dispatch, incomingLink } = useStore();
   const v = latest(p);
   const [inspect, setInspect] = useState<Claim | null>(null);
   const [ack, setAck] = useState(false);
@@ -67,17 +67,18 @@ export function Handover() {
                   className="primary"
                   onClick={() => dispatch({ type: "role", role: "incoming" })}
                 >
-                  View as incoming developer
+                  Get Neha’s access link
                 </button>
               )}
             </div>
           </section>
+          {incomingLink&&<section className="panel"><label>Neha’s access link<input readOnly value={incomingLink} onFocus={e=>e.target.select()}/></label><a className="button" target="_blank" rel="noopener noreferrer" href={incomingLink}>Open Neha’s handover</a></section>}
           <div className="notice">
             <ShieldCheck size={18} />
             <p>
               Only approved, audience-appropriate content is included.
               “Unresolved” means a reviewer has chosen to carry an open question
-              forward. Frontend permissions simulate the proposed server-side
+              forward. The server applies audience access
               controls.
             </p>
           </div>
@@ -143,7 +144,7 @@ export function Handover() {
   );
 }
 export function Plan() {
-  const { state, p, dispatch } = useStore();
+  const { state, p, dispatch, incomingLink } = useStore();
   const v = latest(p);
   const tasks = plan(v);
   const completed = tasks.filter((t) => p.tasks[t.id]?.done).length;
@@ -184,7 +185,7 @@ export function Plan() {
           </section>
           {state.role !== "incoming" && (
             <p className="notice">
-              Switch to Incoming Developer to complete tasks and add personal
+              Use Neha’s access link to complete tasks and add personal
               notes.
             </p>
           )}
@@ -231,8 +232,8 @@ export function Plan() {
                           Personal notes
                           <textarea
                             placeholder="Your observations and next steps…"
-                            value={progress.note}
-                            onChange={(e) =>
+                            defaultValue={progress.note}
+                            onBlur={(e) =>
                               dispatch({
                                 type: "task",
                                 id: t.id,

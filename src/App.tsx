@@ -74,54 +74,12 @@ function Guard({
     return <Navigate to="/handover" replace />;
   return children;
 }
-const guideSteps = [
-  [
-    "Start with your sources",
-    "Connect the repository, meeting notes, task board and communication export. Each source changes what Relay can reconstruct.",
-    "/sources",
-  ],
-  [
-    "Reconstruct the project",
-    "Run the simulated pipeline. Only connected, authorized synthetic records are read.",
-    "/reconstruct",
-  ],
-  [
-    "Inspect the contradiction",
-    "Open the payment claim. Compare the open issue with the message claiming the staging issue is fixed.",
-    "/evidence/payment",
-  ],
-  [
-    "Keep a human in control",
-    "Review every claim. Correct payment status, reassign cron ownership, and record verification reasons. Reject a claim to see it excluded.",
-    "/review",
-  ],
-  [
-    "Approve a version",
-    "Choose the incoming developer audience, confirm appropriateness and approve. Unresolved claims remain clearly labelled.",
-    "/review",
-  ],
-  [
-    "Change perspectives",
-    "Switch to Neha’s incoming developer view. Drafts, lead-only claims and restricted sources are unavailable.",
-    "/handover",
-  ],
-  [
-    "Turn context into action",
-    "Open a task, inspect its evidence, add a personal note and mark it complete. Progress updates immediately.",
-    "/plan",
-  ],
-  [
-    "Close the loop",
-    "Return to the handover and acknowledge receipt. You have completed the same workflow the free-exploration screens use.",
-    "/handover",
-  ],
-];
 function Shell() {
-  const { state, p, dispatch, storageError } = useStore();
+  const { state, p, dispatch, busy } = useStore();
   const loc = useLocation();
   const nav = useNavigate();
   const [reset, setReset] = useState(false);
-  const [guide, setGuide] = useState(-1);
+  const [guide, setGuide] = useState(0);
   const [menu, setMenu] = useState(false);
   const [about, setAbout] = useState(false);
   const [toast, setToast] = useState("");
@@ -137,21 +95,6 @@ function Shell() {
     setMenu(false);
     window.scrollTo(0, 0);
   }, [loc.pathname]);
-  function goGuide(i: number) {
-    setGuide(i);
-    if (i === 5) dispatch({ type: "role", role: "incoming" });
-    nav(guideSteps[i][2]);
-  }
-  const guideReady =
-    guide === 0
-      ? p.connections.length === 4
-      : guide === 1
-        ? p.run > 0
-        : guide === 3
-          ? !p.claims.some((c) => c.review === "Pending Review")
-          : guide === 4
-            ? !!latest(p)
-            : true;
   return (
     <div className="app-shell">
       <a
@@ -178,7 +121,7 @@ function Shell() {
           <span className="workspace-avatar">D4</span>
           <div>
             <strong>Project continuity</strong>
-            <small>Round 1 · Design simulation</small>
+            <small>Round 2 · Knowledge handover</small>
           </div>
         </div>
         <div className="nav-label">WORKSPACE</div>
@@ -273,42 +216,14 @@ function Shell() {
           </button>
           <label className="project-switch">
             <span className="tiny-project">{current.code}</span>
-            <select
-              aria-label="Current project"
-              value={state.projectId}
-              onChange={(e) => {
-                dispatch({ type: "project", id: e.target.value });
-                setGuide(-1);
-                nav("/");
-              }}
-            >
-              {projects.map((pr) => (
-                <option key={pr.id} value={pr.id}>
-                  {pr.name}
-                </option>
-              ))}
-            </select>
+<strong>{current.name}</strong>
           </label>
           <div className="topbar-right">
             <span className="demo-pill">
-              <span /> DEMO MODE
+              <span /> CAMPUSCONNECT
             </span>
-            <select
-              aria-label="Demo role"
-              value={state.role}
-              onChange={(e) => {
-                dispatch({ type: "role", role: e.target.value as Role });
-                nav(e.target.value === "incoming" ? "/handover" : "/");
-              }}
-            >
-              <option value="reviewer">Team Lead / Reviewer</option>
-              <option value="incoming">Incoming Developer</option>
-              <option value="departing">Departing Developer</option>
-            </select>
-            <button className="reset-button" onClick={() => setReset(true)}>
-              <RotateCcw size={15} />
-              <span>Reset Demo</span>
-            </button>
+<strong>{state.role==='reviewer'?'Team lead · Riya':'Incoming developer · Neha'}</strong>
+ {state.role==='reviewer'&&<button className="reset-button" onClick={()=>setReset(true)}><RotateCcw size={15}/>Reset workspace</button>}
           </div>
         </header>
         <div className="context-bar">
@@ -320,53 +235,9 @@ function Shell() {
                 "Evidence detail"}
             </strong>
           </span>
-          <button
-            className="text-link"
-            onClick={() => {
-              dispatch({ type: "role", role: "reviewer" });
-              goGuide(0);
-            }}
-          >
-            <RouteIcon size={16} /> Guided Demo
-          </button>
-        </div>
-        {guide >= 0 && (
-          <section className="guide" aria-label="Guided demo">
-            <div className="guide-number">{guide + 1}/8</div>
-            <div>
-              <strong>{guideSteps[guide][0]}</strong>
-              <p>{guideSteps[guide][1]}</p>
-            </div>
-            <div className="guide-actions">
-              <button onClick={() => setGuide(-1)}>Explore Freely</button>
-              {guide > 0 && (
-                <button
-                  onClick={() => {
-                    if (guide - 1 < 5)
-                      dispatch({ type: "role", role: "reviewer" });
-                    goGuide(guide - 1);
-                  }}
-                >
-                  Back
-                </button>
-              )}
-              <button
-                className="primary"
-                disabled={!guideReady}
-                onClick={() => (guide < 7 ? goGuide(guide + 1) : setGuide(-1))}
-              >
-                {guide === 7 ? "Finish tour" : "Next"}
-                <ArrowRight size={15} />
-              </button>
-            </div>
-          </section>
-        )}
-        {storageError && (
-          <p className="storage-warning" role="status">
-            Browser storage is unavailable. You can continue, but this session
-            will not survive a reload.
-          </p>
-        )}
+<button onClick={()=>setGuide(guide<0?0:-1)}>How to try this</button></div>
+ <p className="notice workspace-banner">Synthetic sample workspace. Your notes stay in this workspace only.</p>
+ {guide>=0&&<section className="panel"><h2>How to try this</h2><ol><li>Open Data Sources and import your own note.</li><li>Run Reconstruction and inspect an exact quotation.</li><li>Review the candidates, choose Neha and approve.</li><li>Open Neha’s link in another browser, complete a task and acknowledge receipt.</li></ol></section>}
         <main id="main" tabIndex={-1} key={`${state.projectId}-${state.role}`}>
           <Routes>
             <Route path="/" element={<Overview />} />
@@ -444,7 +315,7 @@ function Shell() {
         <footer>
           <span>Relay · Interactive Concept Prototype</span>
           <span>
-            Synthetic demonstration data · Simulated integrations & AI
+            Sample records and imported notes · Server-enforced roles
           </span>
         </footer>
       </div>
@@ -463,14 +334,12 @@ function Shell() {
       {reset && (
         <Modal title="Reset the entire demo?" onClose={() => setReset(false)}>
           <p>
-            This clears both local project workspaces, including reviews,
-            approved versions, personal notes and onboarding progress. All
-            sources return to disconnected.
+            This retires your workspace and its links, and starts a fresh CampusConnect workspace.
           </p>
           <div className="actions">
             <button onClick={() => setReset(false)}>Keep my progress</button>
             <button
-              className="danger"
+              disabled={busy} className="danger"
               onClick={() => {
                 dispatch({ type: "reset" });
                 setReset(false);
@@ -489,34 +358,7 @@ function Shell() {
           title="A concept you can interact with"
           onClose={() => setAbout(false)}
         >
-          <p>
-            Relay is Dev404’s evidence-aware knowledge handover proposal for
-            HackWithPune. This local React experience simulates its workflow
-            with deterministic, fictional records.
-          </p>
-          <h3>What is simulated?</h3>
-          <p>
-            Source connections, AI extraction, roles, access checks and
-            collaboration. Nothing connects to GitHub, an AI model or a
-            production database. State is stored in this browser.
-          </p>
-          <h3>Event status</h3>
-          <p>
-            The supplied brief restricts development to the official build
-            window. Round 1 prototype eligibility is unconfirmed. This is a
-            design simulation, not a claim of an eligible competition build.
-          </p>
-          <h3>Proposed production system</h3>
-          <p>
-            React → FastAPI with authenticated permission checks → PostgreSQL +
-            pgvector. Authorized GitHub and file ingestion feed bounded
-            structured LLM extraction, followed by deterministic evidence checks
-            and human review.
-          </p>
-          <p className="hint">
-            Generated with OpenAI Codex assistance. No accuracy or
-            onboarding-improvement metrics have been measured.
-          </p>
+<p>Relay uses signed anonymous access links and PostgreSQL. Synthetic records illustrate the handover. Notes are imported and processed on the server. Candidate labels identify the extractor. This demo uses simplified bearer-link access without OAuth.</p>
         </Modal>
       )}
     </div>
