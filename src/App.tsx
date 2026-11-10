@@ -169,7 +169,7 @@ function Shell() {
             </p>
           </div>
           <button className="sidebar-about" onClick={() => setAbout(true)}>
-            About this prototype <ArrowUpRight size={14} />
+            About Relay <ArrowUpRight size={14} />
           </button>
           <div className="sidebar-user">
             <span className="avatar">
@@ -216,14 +216,23 @@ function Shell() {
           </button>
           <label className="project-switch">
             <span className="tiny-project">{current.code}</span>
-<strong>{current.name}</strong>
+            <strong>{current.name}</strong>
           </label>
           <div className="topbar-right">
             <span className="demo-pill">
               <span /> CAMPUSCONNECT
             </span>
-<strong>{state.role==='reviewer'?'Team lead · Riya':'Incoming developer · Neha'}</strong>
- {state.role==='reviewer'&&<button className="reset-button" onClick={()=>setReset(true)}><RotateCcw size={15}/>Reset workspace</button>}
+            <strong>
+              {state.role === "reviewer"
+                ? "Team lead · Riya"
+                : "Incoming developer · Neha"}
+            </strong>
+            {state.role === "reviewer" && (
+              <button className="reset-button" onClick={() => setReset(true)}>
+                <RotateCcw size={15} />
+                Reset workspace
+              </button>
+            )}
           </div>
         </header>
         <div className="context-bar">
@@ -235,9 +244,27 @@ function Shell() {
                 "Evidence detail"}
             </strong>
           </span>
-<button onClick={()=>setGuide(guide<0?0:-1)}>How to try this</button></div>
- <p className="notice workspace-banner">Synthetic sample workspace. Your notes stay in this workspace only.</p>
- {guide>=0&&<section className="panel"><h2>How to try this</h2><ol><li>Open Data Sources and import your own note.</li><li>Run Reconstruction and inspect an exact quotation.</li><li>Review the candidates, choose Neha and approve.</li><li>Open Neha’s link in another browser, complete a task and acknowledge receipt.</li></ol></section>}
+          <button onClick={() => setGuide(guide < 0 ? 0 : -1)}>
+            How to try this
+          </button>
+        </div>
+        <p className="notice workspace-banner">
+          Synthetic sample workspace. Your notes stay in this workspace only.
+        </p>
+        {guide >= 0 && (
+          <section className="panel">
+            <h2>How to try this</h2>
+            <ol>
+              <li>Open Data Sources and import your own note.</li>
+              <li>Run Reconstruction and inspect an exact quotation.</li>
+              <li>Review the candidates, choose Neha and approve.</li>
+              <li>
+                Open Neha’s link in another browser, complete a task and
+                acknowledge receipt.
+              </li>
+            </ol>
+          </section>
+        )}
         <main id="main" tabIndex={-1} key={`${state.projectId}-${state.role}`}>
           <Routes>
             <Route path="/" element={<Overview />} />
@@ -313,10 +340,8 @@ function Shell() {
           </Routes>
         </main>
         <footer>
-          <span>Relay · Interactive Concept Prototype</span>
-          <span>
-            Sample records and imported notes · Server-enforced roles
-          </span>
+          <span>Relay · DEV404</span>
+          <span>Sample records and imported notes · Server-enforced roles</span>
         </footer>
       </div>
       {toast && state.role === "reviewer" && (
@@ -334,12 +359,14 @@ function Shell() {
       {reset && (
         <Modal title="Reset the entire demo?" onClose={() => setReset(false)}>
           <p>
-            This retires your workspace and its links, and starts a fresh CampusConnect workspace.
+            This retires your workspace and its links, and starts a fresh
+            CampusConnect workspace.
           </p>
           <div className="actions">
             <button onClick={() => setReset(false)}>Keep my progress</button>
             <button
-              disabled={busy} className="danger"
+              disabled={busy}
+              className="danger"
               onClick={() => {
                 dispatch({ type: "reset" });
                 setReset(false);
@@ -354,11 +381,13 @@ function Shell() {
         </Modal>
       )}
       {about && (
-        <Modal
-          title="A concept you can interact with"
-          onClose={() => setAbout(false)}
-        >
-<p>Relay uses signed anonymous access links and PostgreSQL. Synthetic records illustrate the handover. Notes are imported and processed on the server. Candidate labels identify the extractor. This demo uses simplified bearer-link access without OAuth.</p>
+        <Modal title="About Relay" onClose={() => setAbout(false)}>
+          <p>
+            Relay uses signed anonymous access links and PostgreSQL. Synthetic
+            records illustrate the handover. Notes are imported and processed on
+            the server. Candidate labels identify the extractor. This demo uses
+            simplified bearer-link access without OAuth.
+          </p>
         </Modal>
       )}
     </div>

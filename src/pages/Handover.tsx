@@ -72,14 +72,32 @@ export function Handover() {
               )}
             </div>
           </section>
-          {incomingLink&&<section className="panel"><label>Neha’s access link<input readOnly value={incomingLink} onFocus={e=>e.target.select()}/></label><a className="button" target="_blank" rel="noopener noreferrer" href={incomingLink}>Open Neha’s handover</a></section>}
+          {incomingLink && (
+            <section className="panel">
+              <label>
+                Neha’s access link
+                <input
+                  readOnly
+                  value={incomingLink}
+                  onFocus={(e) => e.target.select()}
+                />
+              </label>
+              <a
+                className="button"
+                target="_blank"
+                rel="noopener noreferrer"
+                href={incomingLink}
+              >
+                Open Neha’s handover
+              </a>
+            </section>
+          )}
           <div className="notice">
             <ShieldCheck size={18} />
             <p>
               Only approved, audience-appropriate content is included.
               “Unresolved” means a reviewer has chosen to carry an open question
-              forward. The server applies audience access
-              controls.
+              forward. The server applies audience access controls.
             </p>
           </div>
           <div className="knowledge-grid">
@@ -185,8 +203,7 @@ export function Plan() {
           </section>
           {state.role !== "incoming" && (
             <p className="notice">
-              Use Neha’s access link to complete tasks and add personal
-              notes.
+              Use Neha’s access link to complete tasks and add personal notes.
             </p>
           )}
           <div className="plan-list">
@@ -246,7 +263,19 @@ export function Plan() {
                           <input
                             type="checkbox"
                             defaultChecked={progress.done}
-                            onChange={async (e) => { const box=e.currentTarget; box.disabled=true; if(!await dispatch({type:"task",id:t.id,done:box.checked}))box.checked=progress.done; box.disabled=false; }}
+                            onChange={async (e) => {
+                              const box = e.currentTarget;
+                              box.disabled = true;
+                              if (
+                                !(await dispatch({
+                                  type: "task",
+                                  id: t.id,
+                                  done: box.checked,
+                                }))
+                              )
+                                box.checked = progress.done;
+                              box.disabled = false;
+                            }}
                           />{" "}
                           Mark task complete
                         </label>

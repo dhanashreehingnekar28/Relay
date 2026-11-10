@@ -109,7 +109,8 @@ export function Evidence({
     <>
       <div className="flex flex-wrap gap-2">
         <Badge>{claim.category}</Badge>
-        <Badge>{claim.evidence}</Badge><Badge>Extractor · {claim.extractor}</Badge>
+        <Badge>{claim.evidence}</Badge>
+        <Badge>Extractor · {claim.extractor}</Badge>
         <Badge>{claim.review}</Badge>
         {claim.restricted && <Badge>Lead only</Badge>}
       </div>

@@ -27,16 +27,19 @@ export function ReviewDialog({
       <form
         onSubmit={async (e) => {
           e.preventDefault();
-          if(!await dispatch({
-            type: "review",
-            id: claim.id,
-            statement,
-            owner,
-            review,
-            note,
-            resolution,
-            gapId: gap?.id,
-          }))return;
+          if (
+            !(await dispatch({
+              type: "review",
+              id: claim.id,
+              statement,
+              owner,
+              review,
+              note,
+              resolution,
+              gapId: gap?.id,
+            }))
+          )
+            return;
           onClose();
         }}
       >
@@ -74,7 +77,16 @@ export function ReviewDialog({
               value={owner}
               onChange={(e) => setOwner(e.target.value)}
             >
-              {Array.from(new Set([claim.owner,"Aarav", "Riya", "Neha", "Kabir", "Unassigned"])).map((n) => (
+              {Array.from(
+                new Set([
+                  claim.owner,
+                  "Aarav",
+                  "Riya",
+                  "Neha",
+                  "Kabir",
+                  "Unassigned",
+                ]),
+              ).map((n) => (
                 <option key={n}>{n}</option>
               ))}
             </select>
@@ -86,11 +98,9 @@ export function ReviewDialog({
               value={review}
               onChange={(e) => setReview(e.target.value as ReviewState)}
             >
-              {["Accepted", "Rejected", "Unresolved"].map(
-                (n) => (
-                  <option key={n}>{n}</option>
-                ),
-              )}
+              {["Accepted", "Rejected", "Unresolved"].map((n) => (
+                <option key={n}>{n}</option>
+              ))}
             </select>
           </label>
         </div>

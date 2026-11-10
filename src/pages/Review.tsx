@@ -164,7 +164,10 @@ export function Review() {
             <button
               className="primary"
               onClick={async () => {
-                if(!await dispatch({ type: "approve", audience, appropriate }))return;
+                if (
+                  !(await dispatch({ type: "approve", audience, appropriate }))
+                )
+                  return;
                 setConfirm(false);
                 nav("/handover");
               }}

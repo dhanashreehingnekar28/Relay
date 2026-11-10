@@ -1,5 +1,14 @@
-import {gaps} from "../data/scenario";
-import type {Claim,ProjectState,SourceRecord,Role,PlanTask,HandoverVersion,ReviewState,SourceType} from "./types";
+import { gaps } from "../data/scenario";
+import type {
+  Claim,
+  ProjectState,
+  SourceRecord,
+  Role,
+  PlanTask,
+  HandoverVersion,
+  ReviewState,
+  SourceType,
+} from "./types";
 export function activeGaps(p: ProjectState) {
   return gaps.filter((g) =>
     p.claims.some(
@@ -36,7 +45,9 @@ export function visibleRecords(p: ProjectState, role: Role) {
     const ids = new Set(readerClaims(v).flatMap((c) => c.refs));
     return v?.records.filter((r) => r.access === "team" && ids.has(r.id)) || [];
   }
-  return (p.records || []).filter(r => role === "reviewer" || r.access === "team");
+  return (p.records || []).filter(
+    (r) => role === "reviewer" || r.access === "team",
+  );
 }
 export function approvalErrors(p: ProjectState) {
   return [

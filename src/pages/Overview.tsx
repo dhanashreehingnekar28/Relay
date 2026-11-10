@@ -131,7 +131,7 @@ export function Overview() {
               ? `Version ${version.id} approved by Riya`
               : p.run
                 ? `${reviewed} of ${p.claims.length} claims reviewed`
-                : "Start by connecting your project sources."}
+                : "Start by importing a meeting note."}
           </p>
         </div>
       </section>
@@ -208,7 +208,7 @@ export function Overview() {
           {[
             [
               "Connect",
-              "Authorize your sources",
+              "Import your sources",
               "/sources",
               p.connections.length > 0,
             ],
@@ -338,7 +338,7 @@ export function Projects() {
         description="Your isolated CampusConnect workspace and its handover team."
       />
       <div className="two-col">
-        {projects.slice(0,1).map((pr) => (
+        {projects.slice(0, 1).map((pr) => (
           <section className="panel" key={pr.id}>
             <span className="project-mark">{pr.code}</span>
             <h2>{pr.name}</h2>
