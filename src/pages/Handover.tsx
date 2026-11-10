@@ -245,14 +245,8 @@ export function Plan() {
                         <label className="check-label">
                           <input
                             type="checkbox"
-                            checked={progress.done}
-                            onChange={(e) =>
-                              dispatch({
-                                type: "task",
-                                id: t.id,
-                                done: e.target.checked,
-                              })
-                            }
+                            defaultChecked={progress.done}
+                            onChange={async (e) => { const box=e.currentTarget; box.disabled=true; if(!await dispatch({type:"task",id:t.id,done:box.checked}))box.checked=progress.done; box.disabled=false; }}
                           />{" "}
                           Mark task complete
                         </label>

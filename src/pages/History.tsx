@@ -145,7 +145,7 @@ export function History() {
                   <details>
                     <summary>Inspect claim change</summary>
                     {p.reviews
-                      .filter((r) => r.claimId === e.claimId && e.detail === r.after.review + ": " + r.after.statement)
+                      .filter((r) => r.claimId === e.claimId && r.at === e.at)
                       .map((r) => (
                         <div className="diff" key={r.id}>
                           <p>

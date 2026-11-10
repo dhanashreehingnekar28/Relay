@@ -6,12 +6,12 @@ import {seed} from './seed.js';
 const actor=role=>role==='incoming'?'Neha':'Riya';
 function source(r){return {id:r.id,title:r.title,type:r.type,author:r.author,timestamp:r.recorded_at,reference:r.id,access:r.visibility==='all'?'team':'reviewer',content:r.text,entities:[]};}
 export function permitted(c){return !c.restricted&&['Accepted','Unresolved'].includes(c.review);}
-async function log(db,w,role,type,detail,id=null){await db.query('INSERT INTO audit_log(workspace,actor,type,detail,claim_id) VALUES($1,$2,$3,$4,$5)',[w,actor(role),type,detail,id]);}
+async function log(db,w,role,type,detail,id=null,at=new Date().toISOString()){await db.query('INSERT INTO audit_log(workspace,actor,type,detail,claim_id,at) VALUES($1,$2,$3,$4,$5,$6)',[w,actor(role),type,detail,id,at]);}
 async function limit(db,bucket,max){
- const window=Math.floor(Date.now()/60000);
- const {rows}=await db.query('INSERT INTO rate_limits VALUES($1,$2,1) ON CONFLICT(bucket,window) DO UPDATE SET hits=rate_limits.hits+1 RETURNING hits',[bucket,window]);
+ const minute_bucket=Math.floor(Date.now()/60000);
+ const {rows}=await db.query('INSERT INTO rate_limits VALUES($1,$2,1) ON CONFLICT(bucket,minute_bucket) DO UPDATE SET hits=rate_limits.hits+1 RETURNING hits',[bucket,minute_bucket]);
  if(rows[0].hits>max)fail(429,'Too many requests. Try again in one minute.');
- await db.query('DELETE FROM rate_limits WHERE window<$1',[window-2]);
+ await db.query('DELETE FROM rate_limits WHERE minute_bucket<$1',[minute_bucket-2]);
 }
 async function versions(db,w,role){
  const order=role==='incoming'?'DESC LIMIT 1':'ASC';
@@ -109,7 +109,7 @@ export async function request(method,path,header,b,ip){
  if(!['Accepted','Rejected','Unresolved'].includes(b.review))fail(400,'Choose a review decision.');
  const after={...before,statement:field(b.statement,2000),owner:field(b.owner,100),review:b.review,note:field(b.note,2000),resolution:field(b.resolution??'',2000,true)};
  const action={id:randomUUID(),claimId:id,before,after,at:new Date().toISOString(),actor:'Riya',reason:after.note,gapId:b.gapId==='gap-'+id?b.gapId:null};
- await db.query('UPDATE claims SET data=$3 WHERE workspace=$1 AND id=$2',[w,id,after]);await db.query('INSERT INTO review_actions(workspace,data) VALUES($1,$2)',[w,action]);await log(db,w,role,'Review',after.review+': '+after.statement,id);
+ await db.query('UPDATE claims SET data=$3 WHERE workspace=$1 AND id=$2',[w,id,after]);await db.query('INSERT INTO review_actions(workspace,data) VALUES($1,$2)',[w,action]);await log(db,w,role,'Review',after.review+': '+after.statement,id,action.at);
  }else if(route==='POST versions'){if(ws.dirty)fail(409,'Reconstruct changed sources first.');await publish(db,w,b);}
  else fail(404,'Unknown route.');
  return {ok:true};

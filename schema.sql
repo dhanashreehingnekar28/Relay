@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS handover_versions(workspace uuid REFERENCES workspace
 CREATE TABLE IF NOT EXISTS tasks(workspace uuid,version int,id text,done boolean NOT NULL DEFAULT false,note text NOT NULL DEFAULT '',PRIMARY KEY(workspace,version,id),FOREIGN KEY(workspace,version) REFERENCES handover_versions);
 CREATE TABLE IF NOT EXISTS acknowledgements(workspace uuid,version int,at timestamptz DEFAULT now(),PRIMARY KEY(workspace,version),FOREIGN KEY(workspace,version) REFERENCES handover_versions);
 CREATE TABLE IF NOT EXISTS audit_log(id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,workspace uuid REFERENCES workspaces,at timestamptz NOT NULL DEFAULT clock_timestamp(),actor text NOT NULL,type text NOT NULL,detail text NOT NULL,claim_id text);
-CREATE TABLE IF NOT EXISTS rate_limits(bucket text,window bigint,hits int NOT NULL,PRIMARY KEY(bucket,window));
+CREATE TABLE IF NOT EXISTS rate_limits(bucket text,minute_bucket bigint,hits int NOT NULL,PRIMARY KEY(bucket,minute_bucket));
 CREATE OR REPLACE FUNCTION relay_immutable() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'immutable record'; END $$;
 DO $$ DECLARE t text; BEGIN FOREACH t IN ARRAY ARRAY['handover_versions','audit_log','review_actions'] LOOP
 EXECUTE format('DROP TRIGGER IF EXISTS immutable ON %I',t);
