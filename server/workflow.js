@@ -303,7 +303,7 @@ export async function request(method, path, header, b, ip) {
         [w, id, title, text, b.visibility],
       );
       await db.query("UPDATE workspaces SET dirty=true WHERE id=$1", [w]);
-      await log(db, w, role, "Imported", title);
+      await log(db, w, role, "Imported", title + " - " + field(b.reason || "Imported project source", 2000));
     } else if (route === "POST reconstruct") {
       await limit(db, "workspace:" + w, 5);
       await limit(db, "extract:" + ipKey, 15);

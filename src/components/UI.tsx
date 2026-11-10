@@ -114,6 +114,7 @@ export function Evidence({
         <Badge>{claim.review}</Badge>
         {claim.restricted && <Badge>Lead only</Badge>}
       </div>
+      {claim.sourceAges && <p>{Object.entries(claim.sourceAges).map(([id,days])=>`${id}: ${days} days old`).join(" · ")}</p>}
       <h2 className="claim-title">{claim.statement}</h2>
       <div className="meta">
         Owner: {claim.owner} · Last evidence: {date(claim.updated)}

@@ -31,7 +31,7 @@ async function api(
   return data;
 }
 type Command =
-  Action | { type: "revoke" } | { type: "import"; text: string; title: string; visibility: string };
+  Action | { type: "revoke" } | { type: "import"; text: string; reason?: string; title: string; visibility: string };
 const key = "relay-session-v2";
 function session() {
   const invite = location.hash.match(/^#invite=([\w.-]+)$/);

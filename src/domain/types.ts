@@ -31,6 +31,7 @@ export interface Claim {
   evidence: EvidenceState;
   review: ReviewState;
   refs: string[];
+  sourceAges?: Record<string,number>;
   quotes?: Record<string,string>;
   extractor?: string;
   explanation: string;

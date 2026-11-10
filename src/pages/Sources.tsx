@@ -4,6 +4,7 @@ import { useStore } from "../state/Store";
 import { Badge, Heading } from "../components/UI";
 export function Sources() {
   const { p, dispatch, busy } = useStore(),
+    [reason,setReason] = useState(""),
     [text, setText] = useState(""),
     [title, setTitle] = useState(""),
     [visibility, setVisibility] = useState("all"),
@@ -29,7 +30,7 @@ export function Sources() {
               type: "import",
               text,
               title: title || "Imported meeting note",
-              visibility,
+              visibility, reason,
             })
           ) {
             setText("");
@@ -44,6 +45,7 @@ export function Sources() {
           receives source text for extraction. Every citation is checked on the
           server.
         </p>
+        <label>Reason for adding this source<input required value={reason} onChange={e=>setReason(e.target.value)}/></label>
         <label>
           Title
           <input
