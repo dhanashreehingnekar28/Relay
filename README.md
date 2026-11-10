@@ -1,13 +1,13 @@
 # Relay · DEV404
 An evidence-aware handover for CampusConnect. A lead imports notes, checks quotations and publishes a version for Neha. Her access link opens an independent session with only the permitted snapshot and its first-week plan.
 
-**Deployment target** [dev407 / relay2](https://vercel.com/dev407/relay2). This is the operator dashboard. Use the production domain shown under Settings → Domains for the judge link. At report time the public Round 2 domain and live acceptance result were unconfirmed. [Public source](https://github.com/kotebhakti30/Relay).
+**Production submission URL:** https://relay2-rho.vercel.app/
 
 ## Try it
 1. Click **Try CampusConnect**. Five fictional source records are created in a fresh workspace.
-2. Under **Data Sources**, paste “Kabir will own the nightly digest cron job after Aarav leaves.” Import the note, run **Reconstruction**, and inspect its exact quotation.
+2. Under **Data Sources**, paste “Kabir will own the nightly digest cron job after Aarav leaves.” Enter reason “Confirm ownership from the meeting note.” Import the note, run **Reconstruction**, and inspect its exact quotation.
 3. Open **Evidence Explorer**. Compare the staging chat and Issue #34. In **Review & Approval**, correct the payment statement and supply a reason and verification outcome. Accept, reject or mark each candidate unresolved. Choose Neha, confirm and approve.
-4. Use **Get Neha’s access link**. Open it in a private window. Complete a first-week task, add a note (saved on leaving the field) and acknowledge receipt. Return to the lead’s **Activity History**. The lead’s session refreshes on window focus, or refresh the page.
+4. Use **Share with Neha**. Open it in a private window and enter the displayed access code. Regenerate or revoke from the sharing panel. Complete a first-week task, add a note (saved on leaving the field) and acknowledge receipt. Return to the lead’s **Activity History**. The lead’s session refreshes on window focus, or refresh the page.
 
 ## Local quick start
 Use Node 22.12+ or 24, npm, and a PostgreSQL database. On Windows run the commands in PowerShell. Never put real company or personal data in this demonstration.
@@ -34,14 +34,14 @@ Open http://127.0.0.1:5173. The local command builds Vite and serves its output 
 
 ## Production setup on Vercel
 1. In Neon, create a **Free** project. Choose **Connect**, select the database and role, and copy its pooled connection string. In **SQL Editor**, run the entire repository file `schema.sql`. Alternatively use the migration command above against the same database.
-2. In Vercel select **dev407 → relay2 → Settings → Git**. Verify the connected repository is **kotebhakti30/Relay** and the production branch is **main**. The application root is the repository root. Use Vite, build command `npm run build`, and output directory `dist`.
+2. In Vercel select **dev407 → relay2 → Settings → Git**. Verify the connected repository is **dhanashreehingnekar28/Relay** and the production branch is **main**. The application root is the repository root. Use Vite, build command `npm run build`, and output directory `dist`.
 3. Under **Settings → Environment Variables**, add DATABASE_URL and SESSION_SECRET to **Production**. Add LLM_API_KEY and LLM_PROVIDER together only when you intend to use a provider within your free allowance. Omitting both selects the tested rules path. Save. A changed signing secret invalidates existing links.
 4. Open **Deployments**, choose the latest main build, select **Redeploy**, and wait for **Ready**. Use **Visit** or **Settings → Domains** to copy the production website address. Open it signed out in a private window. If the production domain prompts for Vercel sign-in, review **Settings → Deployment Protection** for production access.
 5. Run the eight-step test on that domain. On Windows PowerShell use the following. Every test run creates new isolated sample workspaces.
 ```powershell
 npm ci
 npx playwright install chromium
-$env:RELAY_TEST_URL = "https://YOUR-PRODUCTION-DOMAIN"
+$env:RELAY_TEST_URL = "https://relay2-rho.vercel.app/"
 npm run test:e2e
 Remove-Item Env:RELAY_TEST_URL
 ```
@@ -49,9 +49,9 @@ Remove-Item Env:RELAY_TEST_URL
 ## Architecture and boundaries
 React/Vite retains the original navigation, Evidence Explorer, Gap Radar, review console, handover, plan and activity screens. Vercel rewrites /api/* to one Node handler. PostgreSQL transactions serialize workspace changes; database triggers reject updates and deletes to published snapshots, reviews and audit events. Acknowledgements and task progress are separate mutable records. A reset retires only the caller’s workspace and issues a new one.
 
-Server-signed, seven-day bearer links identify the workspace and role. The server verifies the signature and active membership before every authenticated operation. Workspace creation bootstraps the lead session. The incoming session queries only the latest audience snapshot and its tasks. Its claim and source detail endpoints use that same view. The workspace token is kept in session storage; invitation links carry a token in the URL fragment that the app consumes. Anyone with that link can act as the recipient. Use synthetic data.
+Server-signed, seven-day sessions identify the workspace and role. The server verifies the signature and active membership before every authenticated operation. Workspace creation bootstraps the lead session. The incoming session queries only the latest audience snapshot and its tasks. Its claim and source detail endpoints use that same view. The workspace token is kept in session storage; invitation links carry a random secret in the URL fragment. A separate six-digit code redeems that secret for an incoming session. Regenerating or revoking invalidates earlier incoming sessions. Anyone with both the link and code can act as the recipient. Use synthetic data.
 
-Reconstruction separates source batches by visibility. A configured model selects categories and verbatim sentences through a structured response. Deterministic checks accept only known source IDs and matching text after whitespace normalization. The statement uses the selected quotation. Rules compute evidence labels; human review starts at Pending Review. Contradiction matching covers opposite status descriptions for matching subjects. One chat record or a sole record over 30 days old receives Insufficient Evidence. This is bounded extraction and does not detect all natural-language contradictions.
+Reconstruction separates source batches by visibility. A configured model selects categories and verbatim sentences through a structured response. Deterministic checks accept only known source IDs and matching text after whitespace normalization. The statement uses the selected quotation. Rules compute evidence labels; human review starts at Pending Review. Contradiction matching covers opposite status descriptions for matching subjects. Fewer than two independent sources, or any cited source over 42 days old, receives Insufficient Evidence; conflicting records take precedence. This is bounded extraction and does not detect all natural-language contradictions.
 
 | Capability | Implementation |
 |---|---|
@@ -73,3 +73,16 @@ The default E2E run starts an isolated real PostgreSQL cluster and serves the pr
 
 ## Team
 Dhanashree S. Hingnekar and Bhakti S. Kote · DEV404 · CodersInPune. [Build report](BUILD_REPORT.md) · [Form draft](FORM_ANSWERS.md).
+
+## Current release verification
+The existing Production build passed all eight acceptance steps in signed-out browser tests on 10 November 2026. New evidence aggregation and revocable code-based sharing are locally verified; their Production deployment still requires the operator checks in RELEASE_CHECKLIST.md.
+
+| Capability | Real | Simulated or limited |
+|---|---|---|
+| Storage and history | PostgreSQL and immutable version/audit triggers | Synthetic CampusConnect sample records |
+| Import | Pasted notes and TXT/Markdown upload | No live GitHub or chat connector |
+| Extraction | Deterministic English rules, exact source excerpts; optional server-side model path | No live LLM verification in this release |
+| Sharing | Signed incoming sessions, link plus access code, server role/workspace checks and revocation | Demo identities, no OAuth |
+| Review and onboarding | Persisted decisions, task notes, completion and receipt | No external notifications |
+
+New sharing columns are added by npm run migrate. Deploy only after migration. Existing incoming links must be regenerated. Evidence labels describe source evidence; Reviewer-confirmed is a separate human decision and never adds a source.

@@ -1,47 +1,47 @@
-# Relay · Round 2 build report
-**DEV404 · CodersInPune** — Dhanashree S. Hingnekar and Bhakti S. Kote.
+# Relay Round 2 build report
 
-**Repository:** https://github.com/kotebhakti30/Relay  
-**Deployment dashboard:** https://vercel.com/dev407/relay2  
-**Judge-facing production URL:** pending verification. The dashboard requires operator access. The previously shared deployment appears in GitHub’s status history for the Round 1 commit. GitHub reported a completed Round 2 deployment for commit 9c7a16b at https://vercel.com/dev407/relay2/7uZfBjaRsubmwxNMAHRsT8S7GWsa. The team alias redirected a signed-out request to Vercel authentication. The eight-step results below apply to the Round 2 production build served locally.
+DEV404 — Dhanashree S. Hingnekar and Bhakti S. Kote.
 
-## Shipped implementation
-The existing React/Vite UI now calls a Node API on the same origin. Anonymous signed tokens scope a visitor to a workspace and role. For public hosting, Vercel runs that API and Neon PostgreSQL stores records, claims, exact evidence links, review history, immutable versions, version-scoped tasks and acknowledgements.
+Production submission URL: https://relay2-rho.vercel.app/
+Repository: https://github.com/dhanashreehingnekar28/Relay
 
-Data Sources accepts pasted text or .txt/.md uploads. Each claim shows its extractor. When configured, a server-side Gemini or Groq request proposes a constrained JSON response. The service checks citation membership and quoted text; it determines uncertainty in code. The tested keyless path uses deterministic English rules. Notes and restricted records are processed in separate visibility batches. Contradictory source status and pending human review are separate labels.
+## Verification status
 
-## Worked handover
-A signed-out visitor pressed **Try CampusConnect** and entered “Kabir will own the nightly digest cron job after Aarav leaves.” Reconstruction produced an ownership claim naming Kabir, with that sentence as its citation. The reviewer opened the payment claim, saw the open Issue #34 and a chat message reporting a fix, and saved “Payment remains blocked until staging validation.” The corrected draft survived refresh. The reviewer rejected the OAuth decision, kept the stale cron-owner claim unresolved and accepted the permitted new note. Approval generated Version 1.
+On 10 November 2026 the existing public deployment passed the eight-step browser acceptance journey and mobile import check in fresh, signed-out Edge contexts. This is the baseline deployment. The updated access-code and evidence-matching implementation has passed local testing but its Production release is not verified.
 
-In a separate browser session Neha saw the Kabir entry and the corrected payment statement. Her link excluded the lead-only vendor record, the rejected decision and later unpublished material. She saved a task note, completed the task and acknowledged receipt. The lead could inspect the review trail and the original Version 1 after a later draft edit.
-
-## Test results
-| Acceptance check | Local production build + PostgreSQL | Public deployment |
+| Acceptance step | Existing live build | Updated local build |
 |---|---|---|
-| Signed-out start and isolated workspace | Passed | Unverified |
-| Paste note; imported record visible | Passed | Unverified |
-| New Kabir claim and exact quotation | Passed | Unverified |
-| Payment conflict, correction and refresh | Passed | Unverified |
-| Three review decisions, required reason, approved immutable version | Passed | Unverified |
-| Separate Neha session; restricted, rejected and pending IDs denied | Passed | Unverified |
-| First-week task note, persisted completion and receipt | Passed | Unverified |
-| Lead history and preserved Version 1 | Passed | Unverified |
+| 1 Isolated CampusConnect workspace | Pass | Pass |
+| 2 Paste Kabir ownership note and see imported record | Pass | Pass |
+| 3 Kabir claim with exact input quotation | Pass | Pass |
+| 4 Conflicting payment claim, corrected and persisted after refresh | Pass | Pass |
+| 5 Accept/reject/unresolved with reasons, approved immutable version | Pass | Pass |
+| 6 Separate incoming browser and 403/404 for restricted and unapproved IDs | Pass using previous bearer link | Pass using new link plus code |
+| 7 Task note/completion persistence and acknowledgement | Pass | Pass |
+| 8 Lead audit history with review, approval and acknowledgement | Pass | Pass |
 
-Seven automated core/database tests passed. Two browser scenarios passed: the eight-step desktop workflow with direct API checks, and mobile navigation with a Markdown upload. The test database was a temporary real PostgreSQL 18 cluster. The published-version test also attempted direct SQL UPDATE and DELETE against an approved snapshot and audit event; PostgreSQL refused all four writes. Optional provider integration was tested with a mocked invalid citation response. Hosted provider calls, Neon connectivity and signed-out Vercel access still require live verification.
+The existing live API returned 200 for workspace creation and state, including five seeded records. This proves those deployed tables and sample creation work. It does not independently identify the Neon project or confirm optional provider variables. The source has serverless API routes and PostgreSQL queries. Vercel project inspection returned 403 for dev407. Access authorization recovery returned 404, Team not found. Production assignment, git linkage, environment variable presence, Deployment Protection settings and the new migration remain operator checks.
 
-## Screenshot checklist
-The browser suite captures three production-build screens after corresponding assertions: Evidence Explorer with the payment contradiction; the isolated incoming handover with permitted claims; and the acknowledged receipt. They are saved under test-results/screens and selected screenshots are reproduced in the PDF. For a final live submission, run the same walkthrough on the public domain and add its verified link.
+## Changes implemented
 
-## Changes from Round 1
-- Replaced browser-only state and simulated reconstruction with PostgreSQL transactions, note ingestion, validated extraction and versioned publication.
-- Used a single Vercel deployment in place of the proposed FastAPI and pgvector services to keep the evidence-to-approval path manageable.
-- Used anonymous scoped links in place of OAuth so a judge can try each role independently.
-- Narrowed source ingestion to notes and a synthetic sample corpus. Repository, task-board and chat examples are seeded records. Live external connectors remain outside this release.
+Matching ownership sentences group by normalized task subject within their visibility scope, including wording such as “Neha confirmed she will own”. Extra independent source records attach to the candidate. Incompatible owners or status updates produce Conflicting. A single source or any source over 42 days old produces Insufficient Evidence. Two or more independent fresh sources without conflict produce Supported. Adding a fresh note to the old Aarav record may correctly produce Conflicting, and the old 45-day record cannot satisfy a two-fresh-source requirement.
 
-## Limitations
-The rules extractor handles common English ownership, decision, risk and status phrases. It can miss paraphrases or contradictions. An exact quotation verifies provenance, while the human reviewer still assesses meaning. Input is bounded to 8,000 characters per note, 30 records and 40,000 source characters per workspace. Session links last seven days; possession grants the corresponding role. Reset retires the workspace. Identity verification and automatic data retention are outside scope. Use synthetic data. A missing or unreachable database produces a visible error.
+Reconstruction preserves existing review resolutions for stable candidate IDs and appends previous evidence states to the claim history. Confirmation is displayed separately from source evidence. Sources show age in days. Review offers supporting-note entry, human confirmation with a required reason, owner/statement editing, unresolved and rejection. Imported supporting notes require a reason and an explicit reconstruction.
 
-## Three Round 3 commitments
-1. Flag impacted claims when a source changes after approval; publish revisions while preserving the earlier version.
-2. Route a specific knowledge gap to the departing member and attach their answer to the claim for review.
-3. Answer incoming-member questions from permitted approved evidence, declining when evidence is insufficient or restricted.
+Approved handovers have a Share with Neha action returning a random 256-bit link secret and six-digit code. Only hashes are stored. Redemption is rate-limited and issues an incoming-only signed session. Regeneration and revocation increment the workspace invitation epoch, invalidating prior sessions. Existing incoming links require regeneration after migration. Every API read remains workspace/role scoped. The incoming handover preserves unresolved labels. The UI displays the current authenticated role.
+
+## Architecture and changes since Round 1
+
+React/Vite calls same-origin Vercel serverless routes. PostgreSQL stores source records, extracted claims, exact evidence links, reviews, immutable handover snapshots, tasks, acknowledgements and audit records. The database is configured through server-only DATABASE_URL. Signed demo sessions replace OAuth. Real text/Markdown ingestion and persisted deterministic extraction replace the Round 1 browser-only fixtures. Optional Gemini/Groq extraction remains guarded by schema and quotation checks; no live provider execution was verified during this update.
+
+The single deployable stack replaces the proposed separate FastAPI service and pgvector retrieval. Connectors remain narrow to support a complete demonstrable workflow. Round 3 refresh/re-review, departing-member clarification and evidence-backed Q&A are deferred.
+
+## Worked handover verified on the existing live deployment
+
+The judge entered “Kabir will own the nightly digest cron job after Aarav leaves.” The sentence appeared as inspectable evidence. The reviewer corrected the conflicting payment statement, refreshed and saw the correction persist. The reviewer accepted, rejected and marked claims unresolved, then approved version 1. In a second browser Neha received the permitted snapshot, completed a task with a saved note and acknowledged it. Direct restricted-source and claim requests returned 403/404. Lead history recorded the reviews and receipt, and a later draft edit did not mutate version 1.
+
+## Tests and limitations
+
+Seven extraction/permission unit tests and the PostgreSQL immutability test passed. Three updated local browser/API scenarios passed, including incoming code redemption, revocation and regeneration, rejected/restricted/unapproved direct-ID denial, unresolved handover inclusion, and evidence count increasing from one to two without counting human confirmation. See RELEASE_CHECKLIST.md for the migration and release handoff. Live status for the new implementation must be updated only after deployment and re-running those checks.
+
+The app uses synthetic demo identities and signed demo access, not OAuth. Extraction uses bounded English rules unless an optional provider is configured. Deterministic topic matching is intentionally narrow and can require human correction. No extraction-accuracy claim or enterprise security certification is made. Historical evidence states are retained in claim data; prior versions and review events remain immutable.
