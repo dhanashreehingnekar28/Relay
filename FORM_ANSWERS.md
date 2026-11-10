@@ -1,5 +1,5 @@
 # DEV404 · Round 2 form draft
-Verification basis: the existing public deployment passed the eight-step signed-out journey on 10 November 2026. The updated release passed local PostgreSQL and separate-browser tests; its public deployment is still unverified.
+Verification basis: the existing public deployment passed the eight-step signed-out journey on 10 November 2026. The updated release also passed the complete public eight-step journey, mobile import, evidence aggregation and revocable sharing tests.
 
 ## Completed features — one per line
 Create an isolated CampusConnect workspace with synthetic source records.  
@@ -19,4 +19,4 @@ We extended the existing React, TypeScript and Vite application, using a Node AP
 We kept the original review and handover screens. We replaced scripted extraction and browser-only state with note ingestion, verified extraction and database-backed approval. A single web deployment replaces the proposed FastAPI and pgvector services to reduce integration work. Signed anonymous links let judges exercise both roles without personal accounts. We narrowed source ingestion to the sample corpus and user notes.
 
 ## Known limits
-External GitHub, task-board and chat synchronisation are outside this build. Rule extraction covers a limited set of English patterns. Signed links provide simplified access. Live model-provider calls were not verified. The existing public deployment passed signed-out acceptance tests. The new matching-note, evidence-explanation and revocable access-code changes passed local tests but still need the Neon migration and verified Production deployment. Live model-provider calls were not exercised.
+External GitHub, task-board and chat synchronisation are outside this build. Rule extraction covers a limited set of English patterns. Signed links provide simplified access. Live model-provider calls were not verified. The existing public deployment passed signed-out acceptance tests. The new matching-note, evidence-explanation and revocable access-code changes passed live tests after the additive Neon migration and Production deployment. Future automatic pushes still require reconnecting the Vercel Git integration. Live model-provider calls were not exercised.

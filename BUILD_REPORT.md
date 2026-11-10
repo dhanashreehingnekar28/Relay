@@ -1,59 +1,48 @@
-# Relay Round 2 build report
-
-DEV404 — Dhanashree S. Hingnekar and Bhakti S. Kote.
+# Relay Round 2 production build report
 
 Production submission URL: https://relay2-rho.vercel.app/
 Repository: https://github.com/dhanashreehingnekar28/Relay
+Branch: main
+Verification date: 10 November 2026 (India)
 
-## Verification status
+## Production release
+The existing dev407 / relay2 project was deployed from the requested repository. Commit 347ee69 reached Ready in Production and the canonical domain was assigned to it. The production build verified all 11 required tables and added/verified the three invitation columns in the existing Neon database. TLS was requested. No existing rows or secrets were replaced. Subsequent release changes add the missing favicon, navigation health regression test and this report; see Vercel deployment metadata for the final commit.
 
-On 10 November 2026 the existing public deployment passed the eight-step browser acceptance journey and mobile import check in fresh, signed-out Edge contexts. This is the baseline deployment. The updated access-code and evidence-matching implementation has passed local testing but its Production release is not verified.
+## Eight-step live acceptance
+All steps passed in fresh signed-out browser contexts against the canonical production domain:
 
-| Acceptance step | Existing live build | Updated local build |
-|---|---|---|
-| 1 Isolated CampusConnect workspace | Pass | Pass |
-| 2 Paste Kabir ownership note and see imported record | Pass | Pass |
-| 3 Kabir claim with exact input quotation | Pass | Pass |
-| 4 Conflicting payment claim, corrected and persisted after refresh | Pass | Pass |
-| 5 Accept/reject/unresolved with reasons, approved immutable version | Pass | Pass |
-| 6 Separate incoming browser and 403/404 for restricted and unapproved IDs | Pass using previous bearer link | Pass using new link plus code |
-| 7 Task note/completion persistence and acknowledgement | Pass | Pass |
-| 8 Lead audit history with review, approval and acknowledgement | Pass | Pass |
+| Step | Result |
+|---|---|
+| 1 Create isolated CampusConnect sample workspace | PASS |
+| 2 Import the Kabir ownership note with a reason | PASS |
+| 3 Reconstruct and inspect the exact quotation | PASS |
+| 4 Correct conflicting payment claim and retain it after refresh | PASS |
+| 5 Review, approve version 1 and preserve immutable snapshot | PASS |
+| 6 Neha link/code session; direct-ID denial for restricted/rejected/unapproved data | PASS |
+| 7 Task note, completion persistence and receipt acknowledgement | PASS |
+| 8 Lead history contains reviews, approval and acknowledgement | PASS |
 
-The existing live API returned 200 for workspace creation and state, including five seeded records. This proves those deployed tables and sample creation work. It does not independently identify the Neon project or confirm optional provider variables. The source has serverless API routes and PostgreSQL queries. Vercel project inspection returned 403 for dev407. Access authorization recovery returned 404, Team not found. Production assignment, git linkage, environment variable presence, Deployment Protection settings and the new migration remain operator checks.
+The three workflow scenarios passed in 36.7 seconds on the first updated live run. They also verify regeneration/revocation, unresolved labels, cross-workspace denial, and one-to-two-source recomputation without treating human confirmation as evidence. Mobile upload and pre-approval denial passed. The navigation/refresh/browser-health check found a missing favicon (404); this release supplies an explicit SVG favicon. Final navigation results are recorded in the deployment handoff after retesting.
 
-## Changes implemented
+## Architecture verified from source
+React 19, TypeScript and Vite; npm lockfile; same-origin Node serverless handler at api/relay.js; pg connection pool and PostgreSQL SQL migrations (no ORM). Hash routes allow refresh without server route rewrites. Vercel rewrites /api/* to the handler. Signed seven-day demo sessions enforce workspace and reviewer/incoming roles at the API. Published versions, reviews and audit records have database immutability triggers. This is demo authentication, not OAuth.
 
-Matching ownership sentences group by normalized task subject within their visibility scope, including wording such as “Neha confirmed she will own”. Extra independent source records attach to the candidate. Incompatible owners or status updates produce Conflicting. A single source or any source over 42 days old produces Insufficient Evidence. Two or more independent fresh sources without conflict produce Supported. Adding a fresh note to the old Aarav record may correctly produce Conflicting, and the old 45-day record cannot satisfy a two-fresh-source requirement.
+Production settings: Vite, repository root, npm ci, Node 24, dist output. Build runs node scripts/production-migrate.js followed by npm run build. The migration takes a transaction advisory lock, adds only absent invitation columns, checks tables and stops on failure. A local upgrade-and-repeat test verified retained rows and immutable triggers.
 
-Reconstruction preserves existing review resolutions for stable candidate IDs and appends previous evidence states to the claim history. Confirmation is displayed separately from source evidence. Sources show age in days. Review offers supporting-note entry, human confirmation with a required reason, owner/statement editing, unresolved and rejection. Imported supporting notes require a reason and an explicit reconstruction.
+## Environment verification
+DATABASE_URL, SESSION_SECRET, LLM_API_KEY and LLM_PROVIDER are configured for Production. No values were printed or changed. Successful migration and live database writes verify DATABASE_URL; signed role tests verify SESSION_SECRET. Optional provider execution is not independently certified: rules and audited provider fallback remain available.
 
-Approved handovers have a Share with Neha action returning a random 256-bit link secret and six-digit code. Only hashes are stored. Redemption is rate-limited and issues an incoming-only signed session. Regeneration and revocation increment the workspace invitation epoch, invalidating prior sessions. Existing incoming links require regeneration after migration. Every API read remains workspace/role scoped. The incoming handover preserves unresolved labels. The UI displays the current authenticated role.
+## Implemented behavior
+Matching ownership sentences attach within their visibility scope. Source counts and evidence labels recompute; incompatible owners/states remain Conflicting. One independent source or any source over 42 days old is Insufficient Evidence; two fresh compatible records are Supported. Human confirmation has its own badge and never adds a source. Reviewer resolutions and previous evidence states persist during reconstruction.
 
-## Architecture and changes since Round 1
+Neha sharing uses a random link secret plus code; only hashes are stored. Redemption is rate-limited. Regeneration and revocation invalidate prior incoming sessions. Unresolved claims remain labelled in the approved view. Import/review/sharing actions are audited.
 
-React/Vite calls same-origin Vercel serverless routes. PostgreSQL stores source records, extracted claims, exact evidence links, reviews, immutable handover snapshots, tasks, acknowledgements and audit records. The database is configured through server-only DATABASE_URL. Signed demo sessions replace OAuth. Real text/Markdown ingestion and persisted deterministic extraction replace the Round 1 browser-only fixtures. Optional Gemini/Groq extraction remains guarded by schema and quotation checks; no live provider execution was verified during this update.
+## Remaining configuration checks
+The Vercel project remains persistently linked to kotebhakti30/Relay. Explicit deployments from the requested dhanashreehingnekar28/Relay repository work, but automatic deployment of future pushes requires changing the dashboard Git connection. The dashboard tab needs the owner to sign in; connector tools do not expose reconnection of an existing project. No duplicate project was created.
 
-The single deployable stack replaces the proposed separate FastAPI service and pgvector retrieval. Connectors remain narrow to support a complete demonstrable workflow. Round 3 refresh/re-review, departing-member clarification and evidence-backed Q&A are deferred.
+The existing connection is verified as Neon with successful schema access. The exact Neon console project/branch ID was not independently matched because the sensitive URL remains hidden and no Neon management session is available. The existing production credential was preserved.
 
-## Worked handover verified on the existing live deployment
+Runtime logs showed a pg SSL-mode deprecation warning; the current driver treats require as verify-full. No application crash was observed. This warning is not an authentication or database failure.
 
-The judge entered “Kabir will own the nightly digest cron job after Aarav leaves.” The sentence appeared as inspectable evidence. The reviewer corrected the conflicting payment statement, refreshed and saw the correction persist. The reviewer accepted, rejected and marked claims unresolved, then approved version 1. In a second browser Neha received the permitted snapshot, completed a task with a saved note and acknowledged it. Direct restricted-source and claim requests returned 403/404. Lead history recorded the reviews and receipt, and a later draft edit did not mutate version 1.
-
-## Tests and limitations
-
-Seven extraction/permission unit tests and the PostgreSQL immutability test passed. Three updated local browser/API scenarios passed, including incoming code redemption, revocation and regeneration, rejected/restricted/unapproved direct-ID denial, unresolved handover inclusion, and evidence count increasing from one to two without counting human confirmation. See RELEASE_CHECKLIST.md for the migration and release handoff. Live status for the new implementation must be updated only after deployment and re-running those checks.
-
-The app uses synthetic demo identities and signed demo access, not OAuth. Extraction uses bounded English rules unless an optional provider is configured. Deterministic topic matching is intentionally narrow and can require human correction. No extraction-accuracy claim or enterprise security certification is made. Historical evidence states are retained in claim data; prior versions and review events remain immutable.
-
-## Final live check after pushing implementation
-
-The updated suite against the canonical Production URL failed all three scenarios because the previous release is still served:
-
-- Desktop and mobile: `Error: locator.fill: Test timeout of 15000ms exceeded.` Call log: `waiting for getByLabel('Reason for adding this source')`. This new required field is absent.
-- Evidence refresh: `Expected: "Insufficient Evidence"; Received: "Supported"` for a single fresh source. Repeating this test with a 60-second timeout produced the same assertion failure.
-- New redemption endpoint probe: HTTP 401, `{"error":"A valid workspace link is required."}`. The updated endpoint returns 403 for invalid codes instead.
-
-For the updated eight-step run: step 1 passed; step 2 failed at the missing reason field; steps 3–8 were blocked by that failure and were not re-verified for the updated release. The baseline results above remain separate. No updated live success is claimed. GitHub main received the implementation; the GitHub combined status had no deployment statuses. Vercel production association and automatic deploy could not be confirmed.
-
-Security checks: .env and .env.production are ignored; only blank .env.example placeholders are tracked. A pattern scan across 13 history revisions found no credentialed PostgreSQL URLs, known provider-token patterns or private-key headers. This is a scoped scan, not proof against every possible secret format. npm audit reported zero vulnerabilities.
+## Real versus simulated
+Database writes, exact-quote validation, review, immutable versions, role restrictions, sharing, tasks and acknowledgements are real. CampusConnect identities and initial records are synthetic. External GitHub/chat/task-board synchronization and OAuth are outside scope. English rule extraction is bounded; optional model access has fallback. No enterprise-security or extraction-accuracy certification is claimed.

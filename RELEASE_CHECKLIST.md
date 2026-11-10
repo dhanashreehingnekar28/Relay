@@ -2,7 +2,7 @@
 
 Production: https://relay2-rho.vercel.app/
 
-The updated source has local verification. The existing live build passed its original eight-step journey. These are different results: the new Production release is not yet verified.
+UPDATE: The new release is deployed and passed the complete live workflow. The production build has already run the additive migration successfully. The remaining dashboard action is reconnecting Git for future automatic deployments. Steps below remain an operational reference.
 
 ## 1. Migrate the existing Neon database
 In Neon select project late-cloud-34503087, branch br-square-paper-bcw4qo4e, and the database used by Vercel DATABASE_URL. Open SQL Editor and run:
@@ -20,7 +20,7 @@ In Vercel, open dev407 / relay2 / Settings / Git. Check that the connected repos
 
 Open Deployments. Check the latest main commit against `git log -1 --oneline`. Wait for Ready and confirm the deployment is Production. If necessary choose Redeploy after migrating and saving environment variables. Under Settings / Domains, assign relay2-rho.vercel.app to this project. Under Settings / Deployment Protection, turn protection off for Production and save. Open the canonical URL in a private window; it must not require Vercel sign-in.
 
-The connected deployment tool returned 403 for dev407; team authorization returned 404, Team not found. This prevented automatic migration/deployment configuration verification. No hosted database credentials were available in the local environment.
+The Bhakti connection now grants access to dev407. The release was deployed through that connection and migrated inside the Production build, keeping credentials private. The dashboard still requires owner sign-in to change the persistent Git repository link.
 
 ## 3. Run updated acceptance automatically
 From the repository in PowerShell:

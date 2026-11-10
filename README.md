@@ -75,7 +75,7 @@ The default E2E run starts an isolated real PostgreSQL cluster and serves the pr
 Dhanashree S. Hingnekar and Bhakti S. Kote · DEV404 · CodersInPune. [Build report](BUILD_REPORT.md) · [Form draft](FORM_ANSWERS.md).
 
 ## Current release verification
-The existing Production build passed all eight acceptance steps in signed-out browser tests on 10 November 2026. New evidence aggregation and revocable code-based sharing are locally verified; their Production deployment still requires the operator checks in RELEASE_CHECKLIST.md.
+On 10 November 2026 the updated Production build passed all eight acceptance steps, mobile import, evidence recomputation, code redemption and revocation on the canonical domain. The production build ran and verified the additive migration using the existing Neon credential. Vercel's persistent Git integration still points to the older repository and needs dashboard reconnection for future automatic pushes; the current release was deployed explicitly from dhanashreehingnekar28/Relay. See BUILD_REPORT.md.
 
 | Capability | Real | Simulated or limited |
 |---|---|---|
@@ -85,4 +85,4 @@ The existing Production build passed all eight acceptance steps in signed-out br
 | Sharing | Signed incoming sessions, link plus access code, server role/workspace checks and revocation | Demo identities, no OAuth |
 | Review and onboarding | Persisted decisions, task notes, completion and receipt | No external notifications |
 
-New sharing columns are added by npm run migrate. Deploy only after migration. Existing incoming links must be regenerated. Evidence labels describe source evidence; Reviewer-confirmed is a separate human decision and never adds a source.
+New sharing columns are checked by scripts/production-migrate.js during every Production build. The script preserves existing rows and stops the build on failure. Existing incoming links must be regenerated. Evidence labels describe source evidence; Reviewer-confirmed is a separate human decision and never adds a source.

@@ -18,7 +18,9 @@ if (process.env.VERCEL_ENV === "production") {
     const required = ["workspaces","users","source_records","claims","evidence_links","review_actions","handover_versions","tasks","acknowledgements","audit_log","rate_limits"];
     if (!required.every(name => rows.some(r => r.table_name === name)))
       throw Object.assign(new Error(), {code:"SCHEMA_INCOMPLETE"});
+    const identity = (await client.query("SELECT current_setting('neon.project_id', true) AS project, current_setting('neon.branch_id', true) AS branch")).rows[0];
     await client.query("COMMIT");
+    console.log("Neon identity metadata:", JSON.stringify(identity));
     const url = new URL(process.env.DATABASE_URL);
     console.log("Production migration verified: 11 required tables, 3 invitation columns; existing rows preserved.");
     console.log("Database provider:", url.hostname.endsWith(".neon.tech") ? "Neon" : "PostgreSQL", "TLS requested:", ["require","verify-full","verify-ca"].includes(url.searchParams.get("sslmode")));
