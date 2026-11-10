@@ -6,9 +6,9 @@ function signature(data) {
     fail(503, "Server setup incomplete: configure SESSION_SECRET.");
   return createHmac("sha256", secret).update(data).digest("base64url");
 }
-export function issue(workspace, role) {
+export function issue(workspace, role, epoch) {
   const data = Buffer.from(
-    JSON.stringify({ workspace, role, exp: Date.now() + 7 * 86400000 }),
+    JSON.stringify({ workspace, role, epoch, exp: Date.now() + 7 * 86400000 }),
   ).toString("base64url");
   return data + "." + signature(data);
 }

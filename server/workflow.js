@@ -1,4 +1,4 @@
-import { randomUUID, createHash } from "node:crypto";
+import { randomUUID, randomBytes, randomInt, createHash } from "node:crypto";
 import { fail, field, transaction } from "./db.js";
 import { issue, verify } from "./session.js";
 import { extract } from "./extract.js";
@@ -192,7 +192,14 @@ export async function request(method, path, header, b, ip) {
       const w = await seed(db);
       return { token: issue(w, "reviewer") };
     });
-  const { role, workspace: w } = verify(header);
+  if (route === "POST redeem") return transaction(async db => {
+    await limit(db, "redeem:" + ipKey, 10);
+    const hash = value => createHash("sha256").update(String(value || "")).digest("hex");
+    const row = (await db.query("SELECT id,invite_epoch FROM workspaces WHERE active AND invite_hash=$1 AND invite_code_hash=$2", [hash(b.secret),hash(b.code)])).rows[0];
+    if (!row) fail(403, "Invalid or revoked access link or code.");
+    return {token:issue(row.id,"incoming",row.invite_epoch)};
+  });
+  const { role, workspace: w, epoch } = verify(header);
   return transaction(async (db) => {
     const ws = (
       await db.query(
@@ -201,6 +208,7 @@ export async function request(method, path, header, b, ip) {
       )
     ).rows[0];
     if (!ws) fail(404, "Workspace unavailable.");
+    if (role === "incoming" && (!ws.invite_hash || epoch !== ws.invite_epoch)) fail(403,"Access revoked. Ask the lead for a new link.");
     if (b.workspace && b.workspace !== w) fail(403, "Workspace mismatch.");
     if (method === "GET") {
       if (path === "audit" && role !== "reviewer")
@@ -267,7 +275,16 @@ export async function request(method, path, header, b, ip) {
     if (route === "POST invite") {
       if (!(await versions(db, w, role)).length)
         fail(409, "Approve a handover first.");
-      return { token: issue(w, "incoming") };
+      const secret=randomBytes(32).toString("base64url"), code=String(randomInt(100000,1000000));
+      const hash = value => createHash("sha256").update(value).digest("hex");
+      await db.query("UPDATE workspaces SET invite_hash=$2,invite_code_hash=$3,invite_epoch=invite_epoch+1 WHERE id=$1",[w,hash(secret),hash(code)]);
+      await log(db,w,role,"Sharing","Generated a new incoming access link; previous access revoked.");
+      return {secret,code};
+    }
+    if (route === "POST revoke") {
+      await db.query("UPDATE workspaces SET invite_hash=null,invite_code_hash=null,invite_epoch=invite_epoch+1 WHERE id=$1",[w]);
+      await log(db,w,role,"Sharing","Revoked incoming access.");
+      return {ok:true};
     }
     if (route === "POST sources") {
       const text = field(b.text, 8000),

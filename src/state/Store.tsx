@@ -31,7 +31,7 @@ async function api(
   return data;
 }
 type Command =
-  Action | { type: "import"; text: string; title: string; visibility: string };
+  Action | { type: "revoke" } | { type: "import"; text: string; title: string; visibility: string };
 const key = "relay-session-v2";
 function session() {
   const invite = location.hash.match(/^#invite=([\w.-]+)$/);
@@ -46,13 +46,16 @@ const Context = createContext<{
   dispatch: (a: Command) => Promise<boolean>;
   busy: boolean;
   incomingLink: string;
+  accessCode: string;
 } | null>(null);
 export function Store({ children }: { children: ReactNode }) {
   const [token, setToken] = useState(session),
     [state, setState] = useState<State | null>(null),
     [busy, setBusy] = useState(false),
     [error, setError] = useState(""),
-    [incomingLink, setLink] = useState("");
+    [incomingLink, setLink] = useState(""),
+    [accessCode,setAccessCode] = useState(""),
+    [code,setCode] = useState("");
   function remember(value: string) {
     sessionStorage.setItem(key, value);
     setToken(value);
@@ -119,9 +122,12 @@ export function Store({ children }: { children: ReactNode }) {
           break;
         case "role": {
           const r = await api("invite", token, "POST", {});
-          setLink(location.origin + location.pathname + "#invite=" + r.token);
+          setLink(location.origin + location.pathname + "#share=" + r.secret);
+          setAccessCode(r.code);
           break;
         }
+        case "revoke":
+          await api("revoke",token,"POST",{});setLink("");setAccessCode("");break;
         case "task":
           await api("tasks/" + a.id, token, "POST", a);
           break;
@@ -155,6 +161,8 @@ export function Store({ children }: { children: ReactNode }) {
       </button>
     </aside>
   );
+  const share = location.hash.match(/^#share=([\w-]+)$/)?.[1];
+  if (share) return <main className="entry"><h1>Neha’s handover</h1><p>Enter the access code supplied by your team lead.</p><form onSubmit={async e=>{e.preventDefault();setBusy(true);try { const r=await api("redeem","","POST",{secret:share,code});history.replaceState(null,"",location.pathname+"#/handover");remember(r.token); }catch(e){setError((e as Error).message);}finally{setBusy(false);}}}><label>Access code<input required value={code} onChange={e=>setCode(e.target.value)} /></label><button disabled={busy}>Open handover</button></form>{feedback}</main>;
   if (!state)
     return (
       <main className="entry">
@@ -187,7 +195,7 @@ export function Store({ children }: { children: ReactNode }) {
       </main>
     );
   return (
-    <Context.Provider value={{ state, dispatch, busy, incomingLink }}>
+    <Context.Provider value={{ state, dispatch, busy, incomingLink, accessCode }}>
       {feedback}
       {busy && (
         <div className="saving" role="status">

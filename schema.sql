@@ -15,4 +15,7 @@ DO $$ DECLARE t text; BEGIN FOREACH t IN ARRAY ARRAY['handover_versions','audit_
 EXECUTE format('DROP TRIGGER IF EXISTS immutable ON %I',t);
 EXECUTE format('CREATE TRIGGER immutable BEFORE UPDATE OR DELETE ON %I FOR EACH ROW EXECUTE FUNCTION relay_immutable()',t);
 END LOOP; END $$;
+ALTER TABLE workspaces ADD COLUMN IF NOT EXISTS invite_hash text;
+ALTER TABLE workspaces ADD COLUMN IF NOT EXISTS invite_code_hash text;
+ALTER TABLE workspaces ADD COLUMN IF NOT EXISTS invite_epoch int NOT NULL DEFAULT 0;
 COMMIT;
