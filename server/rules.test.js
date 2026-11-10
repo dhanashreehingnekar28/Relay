@@ -11,7 +11,7 @@ test("Exact quotes allow only whitespace differences", () => {
 });
 test("Contradictions outrank stale and low authority", () => {
   const fresh = { recorded_at: new Date(), type: "notes" };
-  assert.equal(uncertainty([fresh], false), "Supported");
+  assert.equal(uncertainty([fresh], false), "Insufficient Evidence");
   assert.equal(
     uncertainty([{ ...fresh, type: "chat" }], false),
     "Insufficient Evidence",
@@ -89,4 +89,15 @@ test("Provider cannot cite unseen records or use a fabricated quotation", async 
     globalThis.fetch = original;
     delete process.env.LLM_API_KEY;
   }
+});
+
+test("Matching ownership notes accumulate evidence without crossing access scopes", async () => {
+ const r=(id,text,visibility="all")=>({id,text,visibility,type:"notes",recorded_at:new Date()});
+ const first=r("one","Neha owns the nightly digest cron job.");
+ const match=r("two","Neha confirmed she will own the nightly digest cron job after Aarav leaves.");
+ const a=await extract([first]); assert.equal(a.claims[0].evidence,"Insufficient Evidence");
+ const b=await extract([first,match]); assert.equal(b.claims.length,1);assert.equal(b.claims[0].refs.length,2);assert.equal(b.claims[0].evidence,"Supported");
+ const unrelated=await extract([first,r("other","We decided to defer OAuth.")]);assert.equal(unrelated.claims.find(c=>c.owner==="Neha").refs.length,1);
+ const conflict=await extract([first,r("three","Kabir owns the nightly digest cron job.")]);assert.equal(conflict.claims[0].evidence,"Conflicting");
+ const restricted=await extract([first,{...match,visibility:"lead_only"}]);assert.equal(restricted.claims.find(c=>!c.restricted).refs.length,1);
 });

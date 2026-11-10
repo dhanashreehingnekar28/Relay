@@ -304,14 +304,13 @@ export async function request(method, path, header, b, ip) {
       ).rows.map((r) => r.data);
       await db.query("DELETE FROM claims WHERE workspace=$1", [w]);
       for (let c of claims) {
-        const existing = prior.find(
-          (old) =>
-            old.id === c.id &&
-            old.evidence === c.evidence &&
-            JSON.stringify(Object.entries(old.quotes).sort()) ===
-              JSON.stringify(Object.entries(c.quotes).sort()),
-        );
-        if (existing) c = existing;
+        const existing = prior.find(old => old.id === c.id);
+        if (existing) {
+          c = {...c, statement: existing.resolution ? existing.statement : c.statement,
+            owner: existing.resolution ? existing.owner : c.owner,
+            review: existing.review, note: existing.note, resolution: existing.resolution,
+            evidenceHistory: [...(existing.evidenceHistory || []), {at:new Date().toISOString(), label:existing.evidence, refs:existing.refs}]};
+        }
         await db.query("INSERT INTO claims VALUES($1,$2,$3)", [w, c.id, c]);
         for (const id of c.refs)
           await db.query("INSERT INTO evidence_links VALUES($1,$2,$3,$4)", [
