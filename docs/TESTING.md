@@ -1,3 +1,5 @@
+> Archived Round 1 prototype notes. For current tests and architecture see [the Round 2 report](../BUILD_REPORT.md).
+
 # Verification results
 
 Executed locally on 7 November 2026 using Node 24.17.0 and headless Microsoft Edge through Playwright.

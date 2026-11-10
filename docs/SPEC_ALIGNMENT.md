@@ -1,3 +1,5 @@
+> Archived Round 1 prototype notes. For current tests and architecture see [the Round 2 report](../BUILD_REPORT.md).
+
 # Specification alignment and event status
 
 Read inputs:

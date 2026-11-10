@@ -6,8 +6,10 @@ test("CampusConnect • eight-step signed-out handover and direct API permission
   baseURL,
 }) => {
   const capture = async (p: typeof page, name: string) => {
-    if (!process.env.RELAY_TEST_URL)
+    if (!process.env.RELAY_TEST_URL) {
+      await p.locator(name === "evidence" ? ".inspector .explanation" : ".handover-banner").evaluate(el=>el.scrollIntoView({block:"start"}));
       await p.screenshot({ path: "test-results/screens/" + name + ".png" });
+    }
   };
   const b = (name: string) => page.getByRole("button", { name, exact: true });
   const go = async (path: string) => {
